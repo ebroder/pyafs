@@ -17,6 +17,8 @@ include_dirs = [os.path.join(os.path.dirname(__file__), 'afs'),
                 '%s/include' % root]
 library_dirs = ['%s/lib' % root,
                 '%s/lib/afs' % root]
+libraries = ['bos', 'volser', 'vldb', 'afsrpc', 'afsauthent', 'cmd',
+             'usd', 'audit']
 
 setup(
     name="PyAFS",
@@ -30,8 +32,7 @@ setup(
     ext_modules=[
         Extension("afs._pts",
                   ["afs/_pts.pyx"],
-                  libraries=['bos', 'volser', 'vldb', 'afsrpc', 'afsauthent',
-                             'cmd', 'usd', 'audit'],
+                  libraries=libraries,
                   include_dirs=include_dirs,
                   library_dirs=library_dirs)
         ],
