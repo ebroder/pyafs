@@ -5,6 +5,7 @@ cdef extern from "ubik.h":
     enum:
         MAXSERVERS
     
+    # ubik_client is an opaque struct, so we don't care about its members
     struct ubik_client:
         pass
 
