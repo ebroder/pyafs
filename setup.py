@@ -18,7 +18,7 @@ include_dirs = [os.path.join(os.path.dirname(__file__), 'afs'),
 library_dirs = ['%s/lib' % root,
                 '%s/lib/afs' % root]
 libraries = ['bos', 'volser', 'vldb', 'afsrpc', 'afsauthent', 'cmd',
-             'usd', 'audit']
+             'usd', 'audit', 'resolv', 'com_err']
 
 setup(
     name="PyAFS",
