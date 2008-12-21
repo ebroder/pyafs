@@ -11,6 +11,8 @@ cdef class PTS:
         cdef ktc_principal prin
         cdef ktc_token token
         cdef rx_securityClass *sc
+        cdef rx_connection *serverconns[MAXSERVERS]
+        cdef int i
         
         if cell is None:
             c_cell = NULL
@@ -56,6 +58,14 @@ cdef class PTS:
             sc = rxnull_NewClientSecurityObject()
         else:
             sec = 2
+        
+        memset(serverconns, 0, sizeof(serverconns))
+        for 0 <= i < info.numServers:
+            serverconns[i] = rx_NewConnection(info.hostAddr[i].sin_addr.s_addr,
+                                              info.hostAddr[i].sin_port,
+                                              PRSRV,
+                                              sc,
+                                              sec)
         
         code = rxs_Release(sc)
     

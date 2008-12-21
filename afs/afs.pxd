@@ -7,6 +7,7 @@ cdef extern from "errno.h":
 cdef extern from "string.h":
     char * strerror(int errnum)
     char * strncpy(char *s1, char *s2, size_t n)
+    void * memset(void *b, int c, size_t n)
 
 cdef extern from "netinet/in.h":
     struct in_addr:
@@ -18,6 +19,7 @@ cdef extern from "netinet/in.h":
         char sin_zero[8]
 
 cdef extern from "afs/stds.h":
+    ctypedef unsigned long afs_uint32
     ctypedef long afs_int32
 
 cdef extern from "afs/dirpath.h":
@@ -58,14 +60,6 @@ cdef extern from "ubik.h":
     struct ubik_client:
         pass
 
-cdef extern from "rx/rx.h":
-    int rx_Init(int port)
-    void rx_Finalize()
-
-cdef extern from *:
-    struct ktc_encryptionKey:
-        pass
-
 cdef extern from "rx/rxkad.h":
     ctypedef char rxkad_level
     
@@ -77,6 +71,9 @@ cdef extern from "rx/rxkad.h":
         rxkad_clear
         rxkad_crypt
     
+    struct ktc_encryptionKey:
+        pass
+
     struct ktc_principal:
         char name[MAXKTCNAMELEN]
         char instance[MAXKTCNAMELEN]
@@ -94,6 +91,19 @@ cdef extern from "rx/rxkad.h":
     
     int rxs_Release(rx_securityClass *aobj)
 
+cdef extern from "rx/rx.h":
+    int rx_Init(int port)
+    void rx_Finalize()
+    
+    struct rx_connection:
+        pass
+    
+    rx_connection *rx_NewConnection(afs_uint32 shost,
+                                    unsigned short sport,
+                                    unsigned short sservice,
+                                    rx_securityClass *securityObject,
+                                    int serviceSecurityIndex)
+
 cdef extern from "afs/auth.h":
     enum:
         MAXKTCTICKETLEN
@@ -108,6 +118,10 @@ cdef extern from "afs/auth.h":
                      ktc_token *token,
                      int tokenLen,
                      ktc_principal *client)
+
+cdef extern from "afs/prclient.h":
+    enum:
+        PRSRV
 
 cdef extern from "afs/com_err.h":
     char * error_message(int)
