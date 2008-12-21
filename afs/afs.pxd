@@ -52,14 +52,6 @@ cdef extern from "afs/cellconfig.h":
                             char *aservice,
                             afsconf_cell *acellInfo)
 
-cdef extern from "ubik.h":
-    enum:
-        MAXSERVERS
-    
-    # ubik_client is an opaque struct, so we don't care about its members
-    struct ubik_client:
-        pass
-
 cdef extern from "rx/rxkad.h":
     ctypedef char rxkad_level
     
@@ -122,6 +114,18 @@ cdef extern from "afs/auth.h":
 cdef extern from "afs/prclient.h":
     enum:
         PRSRV
+
+cdef extern from "ubik.h":
+    enum:
+        MAXSERVERS
+    
+    # ubik_client is an opaque struct, so we don't care about its members
+    struct ubik_client:
+        pass
+    
+    int ubik_ClientInit(rx_connection **serverconns,
+                        ubik_client **aclient)
+    afs_int32 ubik_ClientDestroy(ubik_client *aclient)
 
 cdef extern from "afs/com_err.h":
     char * error_message(int)

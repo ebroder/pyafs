@@ -67,7 +67,12 @@ cdef class PTS:
                                               sc,
                                               sec)
         
+        code = ubik_ClientInit(serverconns, &self.client)
+        if code != 0:
+            raise Exception("Failed to initialize ubik connection to Protection server: %s" % error_message(code))
+        
         code = rxs_Release(sc)
     
     def __dealloc__(self):
+        ubik_ClientDestroy(self.client)
         rx_Finalize()
