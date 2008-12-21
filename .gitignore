@@ -1,0 +1,6 @@
+afs/_pts.c
+*.so
+build
+dist
+*.pyc
+PyAFS.egg-info
