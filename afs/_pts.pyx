@@ -8,6 +8,8 @@ cdef class PTS:
         cdef a.afsconf_dir *cdir
         cdef a.afsconf_cell info
         cdef char * c_cell
+        cdef a.ktc_principal prin
+        cdef a.ktc_token token
         
         if cell is None:
             c_cell = NULL
@@ -28,6 +30,18 @@ cdef class PTS:
         code = a.afsconf_GetCellInfo(cdir, c_cell, "afsprot", &info)
         if code != 0:
             raise Exception(code, "GetCellInfo: %s" % a.error_message(code))
+        
+        if sec > 0:
+            a.strncpy(prin.cell, info.name, sizeof(prin.cell))
+            prin.instance[0] = 0
+            a.strncpy(prin.name, "afs", sizeof(prin.name))
+            
+            code = a.ktc_GetToken(&prin, &token, sizeof(token), NULL);
+            if code != 0:
+                if sec >= 2:
+                    # No really - we wanted authentication
+                    raise Exception(code, "Failed to get token for service AFS: %s" % a.error_message(code))
+                sec = 0
     
     def __dealloc__(self):
         a.rx_Finalize()

@@ -1,8 +1,12 @@
+cdef extern from *:
+    ctypedef long size_t
+
 cdef extern from "errno.h":
     int errno
 
 cdef extern from "string.h":
     char * strerror(int errnum)
+    char * strncpy(char *s1, char *s2, size_t n)
 
 cdef extern from "netinet/in.h":
     struct in_addr:
@@ -58,5 +62,34 @@ cdef extern from "rx/rx.h":
     int rx_Init(int port)
     void rx_Finalize()
 
+cdef extern from "rx/rxkad.h":
+    enum:
+        MAXKTCNAMELEN
+        MAXKTCREALMLEN
+    
+    struct ktc_principal:
+        char name[MAXKTCNAMELEN]
+        char instance[MAXKTCNAMELEN]
+        char cell[MAXKTCREALMLEN]
+
 cdef extern from "afs/com_err.h":
     char * error_message(int)
+
+cdef extern from "afs/auth.h":
+    enum:
+        MAXKTCTICKETLEN
+    
+    # We don't look into this
+    struct ktc_encryptionKey:
+        pass
+    
+    struct ktc_token:
+        ktc_encryptionKey sessionKey
+        short kvno
+        int ticketLen
+        char ticket[MAXKTCTICKETLEN]
+    
+    int ktc_GetToken(ktc_principal *server,
+                     ktc_token *token,
+                     int tokenLen,
+                     ktc_principal *client)
