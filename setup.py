@@ -24,7 +24,7 @@ setup(
     description="PyAFS - Python bindings for AFS",
     author="Evan Broder",
     author_email="broder@mit.edu",
-    license="MIT",
+    license="GPL",
     requires=['Pyrex'],
     packages=find_packages(),
     ext_modules=[
