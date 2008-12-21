@@ -1,0 +1,12 @@
+This project is an attempt to develop a fully Python-based interface
+to the AFS APIs. It is based on the Perl AFS module
+(http://search.cpan.org/~nog/AFS-2.6.1).
+
+The goal is essentially to implement the full "high-level" API of the
+Perl modules in a combination of Python and Pyrex.
+
+I am depending on patches from other people, beacuse I will not finish
+this on my own. I think I've established enough of the structure that
+others can see what I want the structure to look like.
+
+Please be sure to sign off on your patches.
