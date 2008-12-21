@@ -13,7 +13,8 @@ for root in ['/Library/OpenAFS/Tools',
     if os.path.exists('%s/include/afs/afs.h' % root):
         break
 
-include_dirs = ['%s/include' % root]
+include_dirs = [os.path.join(os.path.dirname(__file__), 'afs'),
+                '%s/include' % root]
 library_dirs = ['%s/lib' % root,
                 '%s/lib/afs' % root]
 

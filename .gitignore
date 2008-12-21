@@ -1,4 +1,6 @@
 afs/_pts.c
+afs/_pts.dep
+
 *.so
 build
 dist
