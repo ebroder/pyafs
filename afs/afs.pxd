@@ -62,26 +62,41 @@ cdef extern from "rx/rx.h":
     int rx_Init(int port)
     void rx_Finalize()
 
+cdef extern from *:
+    struct ktc_encryptionKey:
+        pass
+
 cdef extern from "rx/rxkad.h":
+    ctypedef char rxkad_level
+    
     enum:
         MAXKTCNAMELEN
         MAXKTCREALMLEN
+    
+    enum:
+        rxkad_clear
+        rxkad_crypt
     
     struct ktc_principal:
         char name[MAXKTCNAMELEN]
         char instance[MAXKTCNAMELEN]
         char cell[MAXKTCREALMLEN]
-
-cdef extern from "afs/com_err.h":
-    char * error_message(int)
+    
+    struct rx_securityClass:
+        pass
+    
+    rx_securityClass *rxkad_NewClientSecurityObject(rxkad_level level,
+                                                    ktc_encryptionKey *sessionKey,
+                                                    afs_int32 kvno,
+                                                    int ticketLen,
+                                                    char *ticket)
+    rx_securityClass *rxnull_NewClientSecurityObject()
+    
+    int rxs_Release(rx_securityClass *aobj)
 
 cdef extern from "afs/auth.h":
     enum:
         MAXKTCTICKETLEN
-    
-    # We don't look into this
-    struct ktc_encryptionKey:
-        pass
     
     struct ktc_token:
         ktc_encryptionKey sessionKey
@@ -93,3 +108,6 @@ cdef extern from "afs/auth.h":
                      ktc_token *token,
                      int tokenLen,
                      ktc_principal *client)
+
+cdef extern from "afs/com_err.h":
+    char * error_message(int)

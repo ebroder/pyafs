@@ -10,6 +10,7 @@ cdef class PTS:
         cdef char * c_cell
         cdef a.ktc_principal prin
         cdef a.ktc_token token
+        cdef a.rx_securityClass *sc
         
         if cell is None:
             c_cell = NULL
@@ -42,6 +43,21 @@ cdef class PTS:
                     # No really - we wanted authentication
                     raise Exception(code, "Failed to get token for service AFS: %s" % a.error_message(code))
                 sec = 0
+            else:
+                if sec == 3:
+                    level = a.rxkad_crypt
+                else:
+                    level = a.rxkad_clear
+                sc = a.rxkad_NewClientSecurityObject(level, &token.sessionKey,
+                                                   token.kvno, token.ticketLen,
+                                                   token.ticket)
+        
+        if sec == 0:
+            sc = a.rxnull_NewClientSecurityObject()
+        else:
+            sec = 2
+        
+        code = a.rxs_Release(sc)
     
     def __dealloc__(self):
         a.rx_Finalize()
