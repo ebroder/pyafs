@@ -10,3 +10,4 @@ cdef extern from "ubik.h":
 
 cdef extern from "rx/rx.h":
     int rx_Init(int port)
+    void rx_Finalize()

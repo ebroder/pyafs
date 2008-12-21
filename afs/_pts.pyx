@@ -11,3 +11,6 @@ cdef class PTS:
         code = a.rx_Init(0)
         if code != 0:
             raise Exception(str(code))
+    
+    def __dealloc__(self):
+        a.rx_Finalize()
