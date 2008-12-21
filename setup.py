@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 from distutils.extension import Extension
-from Pyrex.Distutils import build_ext
+from Cython.Distutils import build_ext
 import sys
 import os
 
@@ -27,7 +27,7 @@ setup(
     author="Evan Broder",
     author_email="broder@mit.edu",
     license="GPL",
-    requires=['Pyrex'],
+    requires=['Cython'],
     packages=find_packages(),
     ext_modules=[
         Extension("afs._pts",
