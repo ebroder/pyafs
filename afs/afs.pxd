@@ -128,4 +128,4 @@ cdef extern from "ubik.h":
     afs_int32 ubik_ClientDestroy(ubik_client *aclient)
 
 cdef extern from "afs/com_err.h":
-    char * error_message(int)
+    char * afs_error_message(int)

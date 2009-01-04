@@ -32,7 +32,7 @@ cdef class PTS:
                               (AFSDIR_CLIENT_ETC_DIRPATH, strerror(errno)))
         code = afsconf_GetCellInfo(cdir, c_cell, "afsprot", &info)
         if code != 0:
-            raise Exception(code, "GetCellInfo: %s" % error_message(code))
+            raise Exception(code, "GetCellInfo: %s" % afs_error_message(code))
         
         if sec > 0:
             strncpy(prin.cell, info.name, sizeof(prin.cell))
@@ -43,7 +43,7 @@ cdef class PTS:
             if code != 0:
                 if sec >= 2:
                     # No really - we wanted authentication
-                    raise Exception(code, "Failed to get token for service AFS: %s" % error_message(code))
+                    raise Exception(code, "Failed to get token for service AFS: %s" % afs_error_message(code))
                 sec = 0
             else:
                 if sec == 3:
@@ -69,7 +69,7 @@ cdef class PTS:
         
         code = ubik_ClientInit(serverconns, &self.client)
         if code != 0:
-            raise Exception("Failed to initialize ubik connection to Protection server: %s" % error_message(code))
+            raise Exception("Failed to initialize ubik connection to Protection server: %s" % afs_error_message(code))
         
         code = rxs_Release(sc)
     
