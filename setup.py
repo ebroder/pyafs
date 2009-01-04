@@ -17,22 +17,8 @@ include_dirs = [os.path.join(os.path.dirname(__file__), 'afs'),
                 '%s/include' % root]
 library_dirs = ['%s/lib' % root,
                 '%s/lib/afs' % root]
-libraries = ['bos', 'volser', 'vldb', 'afsrpc', 'afsauthent', 'cmd', 'usd',
-             'audit', 'util',
-             'util', 'afsrpc', 'util',
-             'util', 'afsauthent', 'util',
-             'resolv']
-extra_objects = []
+libraries = ['afsauthent', 'afsrpc', 'afsutil', 'resolv']
 define_macros = [('AfS_PTHREAD_ENV', None)]
-
-for i, l in enumerate(libraries):
-    if l in ('util', 'vlib') and \
-            not os.path.exists('%s/lib/afs/lib%s.a' % (root, l)):
-        libraries.pop(i)
-        extra_objects.append('%s/lib/afs/%s.a' % (root, l))
-    elif l == 'com_err':
-        libraries.pop(i)
-        extra_objects.append('%s/lib/afs/libcom_err.a')
 
 setup(
     name="PyAFS",
@@ -49,7 +35,6 @@ setup(
                   libraries=libraries,
                   include_dirs=include_dirs,
                   library_dirs=library_dirs,
-                  extra_objects=extra_objects,
                   define_macros=define_macros)
         ],
     cmdclass= {"build_ext": build_ext}
