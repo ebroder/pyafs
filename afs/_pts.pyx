@@ -28,6 +28,7 @@ cdef import from "afs/ptuser.h":
     int ubik_PR_AddToGroup(ubik_client *, afs_int32, afs_int32, afs_int32)
     int ubik_PR_RemoveFromGroup(ubik_client *, afs_int32, afs_int32, afs_int32)
     int ubik_PR_ListElements(ubik_client *, afs_int32, afs_int32, prlist *, afs_int32 *)
+    int ubik_PR_ListOwned(ubik_client *, afs_int32, afs_int32, prlist *, afs_int32 *)
 
 cdef import from "afs/pterror.h":
     enum:
@@ -283,3 +284,29 @@ cdef class PTS:
             raise Exception("Failed to get group membership: %s" % afs_error_message(code))
 
         return members
+
+    def ListOwned(self, oid):
+        """
+        Get all groups owned by an entity.
+        """
+        cdef afs_int32 code, over
+        cdef prlist alist
+        cdef int i
+        cdef object owned = []
+
+        alist.prlist_len = 0
+        alist.prlist_val = NULL
+
+        code = ubik_PR_ListOwned(self.client, 0, oid, &alist, &over)
+
+        if alist.prlist_val is not NULL:
+            for i in range(alist.prlist_len):
+                owned.append(alist.prlist_val[i])
+            free(alist.prlist_val)
+
+        if over:
+            code = PRTOOMANY
+        if code != 0:
+            raise Exception("Failed to get owned entities: %s" % afs_error_message(code))
+
+        return owned
