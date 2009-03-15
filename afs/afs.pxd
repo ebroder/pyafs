@@ -8,6 +8,7 @@ cdef extern from "string.h":
     char * strerror(int errnum)
     char * strncpy(char *s1, char *s2, size_t n)
     void * memset(void *b, int c, size_t n)
+    void * memcpy(void *s1, void *s2, size_t n)
 
 cdef extern from "stdlib.h":
      void * malloc(size_t size)

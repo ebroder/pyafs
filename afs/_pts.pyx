@@ -20,6 +20,17 @@ cdef import from "afs/ptuser.h":
         unsigned int idlist_len
         afs_int32 *idlist_val
 
+    struct prcheckentry:
+        afs_int32 flags
+        afs_int32 id
+        afs_int32 owner
+        afs_int32 creator
+        afs_int32 ngroups
+        afs_int32 nusers
+        afs_int32 count
+        afs_int32 reserved[5]
+        char name[PR_MAXNAMELEN]
+
     int ubik_PR_NameToID(ubik_client *, afs_int32, namelist *, idlist *)
     int ubik_PR_IDToName(ubik_client *, afs_int32, idlist *, namelist *)
     int ubik_PR_INewEntry(ubik_client *, afs_int32, char *, afs_int32, afs_int32)
@@ -36,6 +47,49 @@ cdef import from "afs/pterror.h":
         PRTOOMANY
 
     void initialize_PT_error_table()
+
+cdef class PTEntry:
+    cdef public afs_int32 flags
+    cdef public afs_int32 id
+    cdef public afs_int32 owner
+    cdef public afs_int32 creator
+    cdef public afs_int32 ngroups
+    cdef public afs_int32 nusers
+    cdef public afs_int32 count
+    cdef afs_int32 reserved[5]
+    cdef public char * name
+
+cdef int _ptentry_from_c(PTEntry p_entry, prcheckentry c_entry) except -1:
+    if p_entry is None:
+        raise TypeError
+        return -1
+
+    p_entry.flags = c_entry.flags
+    p_entry.id = c_entry.id
+    p_entry.owner = c_entry.owner
+    p_entry.creator = c_entry.creator
+    p_entry.ngroups = c_entry.ngroups
+    p_entry.nusers = c_entry.nusers
+    p_entry.count = c_entry.count
+    memcpy(p_entry.reserved, c_entry.reserved, sizeof(p_entry.reserved))
+    p_entry.name = c_entry.name
+    return 0
+
+cdef int _ptentry_to_c(prcheckentry * c_entry, PTEntry p_entry) except -1:
+    if p_entry is None:
+        raise TypeError
+        return -1
+
+    c_entry.flags = p_entry.flags
+    c_entry.id = p_entry.id
+    c_entry.owner = p_entry.owner
+    c_entry.creator = p_entry.creator
+    c_entry.ngroups = p_entry.ngroups
+    c_entry.nusers = p_entry.nusers
+    c_entry.count = p_entry.count
+    memcpy(c_entry.reserved, p_entry.reserved, sizeof(p_entry.reserved))
+    strncpy(c_entry.name, p_entry.name, sizeof(c_entry.name))
+    return 0
 
 cdef class PTS:
     """
