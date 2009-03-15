@@ -250,9 +250,15 @@ cdef class PTS:
         if code != 0:
             raise Exception("Failed to remove user from group: %s" % afs_error_message(code))
 
-    def ListMembers(self, gid):
+    def ListMembers(self, id):
         """
-        Get the membership of the list with the given ID.
+        Get the membership of an entity.
+
+        If id is a group ID, this returns the users that are in that
+        group.
+
+        If id is a user ID, this returns the list of groups that user
+        is on.
 
         This returns a list of PTS IDs.
         """
@@ -264,7 +270,7 @@ cdef class PTS:
         alist.prlist_len = 0
         alist.prlist_val = NULL
 
-        code = ubik_PR_ListElements(self.client, 0, gid, &alist, &over)
+        code = ubik_PR_ListElements(self.client, 0, id, &alist, &over)
 
         if alist.prlist_val is not NULL:
             for i in range(alist.prlist_len):
