@@ -30,12 +30,12 @@ cdef extern from "afs/cellconfig.h":
         MAXCELLCHARS
         MAXHOSTSPERCELL
         MAXHOSTCHARS
-    
+
     # We just pass afsconf_dir structs around to other AFS functions,
     # so this can be treated as opaque
     struct afsconf_dir:
         pass
-    
+
     # For afsconf_cell, on the other hand, we care about everything
     struct afsconf_cell:
         char name[MAXCELLCHARS]
@@ -45,7 +45,7 @@ cdef extern from "afs/cellconfig.h":
         char hostName[MAXHOSTSPERCELL][MAXHOSTCHARS]
         char *linkedCell
         int timeout
-     
+
     afsconf_dir *afsconf_Open(char *adir)
     int afsconf_GetCellInfo(afsconf_dir *adir,
                             char *acellName,
@@ -54,15 +54,15 @@ cdef extern from "afs/cellconfig.h":
 
 cdef extern from "rx/rxkad.h":
     ctypedef char rxkad_level
-    
+
     enum:
         MAXKTCNAMELEN
         MAXKTCREALMLEN
-    
+
     enum:
         rxkad_clear
         rxkad_crypt
-    
+
     struct ktc_encryptionKey:
         pass
 
@@ -70,26 +70,26 @@ cdef extern from "rx/rxkad.h":
         char name[MAXKTCNAMELEN]
         char instance[MAXKTCNAMELEN]
         char cell[MAXKTCREALMLEN]
-    
+
     struct rx_securityClass:
         pass
-    
+
     rx_securityClass *rxkad_NewClientSecurityObject(rxkad_level level,
                                                     ktc_encryptionKey *sessionKey,
                                                     afs_int32 kvno,
                                                     int ticketLen,
                                                     char *ticket)
     rx_securityClass *rxnull_NewClientSecurityObject()
-    
+
     int rxs_Release(rx_securityClass *aobj)
 
 cdef extern from "rx/rx.h":
     int rx_Init(int port)
     void rx_Finalize()
-    
+
     struct rx_connection:
         pass
-    
+
     rx_connection *rx_NewConnection(afs_uint32 shost,
                                     unsigned short sport,
                                     unsigned short sservice,
@@ -99,13 +99,13 @@ cdef extern from "rx/rx.h":
 cdef extern from "afs/auth.h":
     enum:
         MAXKTCTICKETLEN
-    
+
     struct ktc_token:
         ktc_encryptionKey sessionKey
         short kvno
         int ticketLen
         char ticket[MAXKTCTICKETLEN]
-    
+
     int ktc_GetToken(ktc_principal *server,
                      ktc_token *token,
                      int tokenLen,
@@ -118,11 +118,11 @@ cdef extern from "afs/prclient.h":
 cdef extern from "ubik.h":
     enum:
         MAXSERVERS
-    
+
     # ubik_client is an opaque struct, so we don't care about its members
     struct ubik_client:
         pass
-    
+
     int ubik_ClientInit(rx_connection **serverconns,
                         ubik_client **aclient)
     afs_int32 ubik_ClientDestroy(ubik_client *aclient)
