@@ -16,6 +16,8 @@ cdef import from "afs/ptuser.h":
 
     int ubik_PR_NameToID(ubik_client *, afs_int32, namelist *, idlist *)
     int ubik_PR_IDToName(ubik_client *, afs_int32, idlist *, namelist *)
+    int ubik_PR_INewEntry(ubik_client *, afs_int32, char *, afs_int32, afs_int32)
+    int ubik_PR_NewEntry(ubik_client *, afs_int32, char *, afs_int32, afs_int32, afs_int32 *)
 
 cdef class PTS:
     cdef ubik_client * client
@@ -133,3 +135,20 @@ cdef class PTS:
         if code != 0:
             raise Exception("Failed to lookup PTS ID: %s" % afs_error_message(code))
         return name
+
+    def CreateUser(self, name, id=None):
+        cdef afs_int32 code
+        cdef afs_int32 cid
+        name = name[:PR_MAXNAMELEN].lower()
+
+        if id is not None:
+            cid = id
+
+        if id is not None:
+            code = ubik_PR_INewEntry(self.client, 0, name, cid, 0)
+        else:
+            code = ubik_PR_NewEntry(self.client, 0, name, 0, 0, &cid)
+
+        if code != 0:
+            raise Exception("Failed to create user: %s" % afs_error_message(code))
+        return cid
