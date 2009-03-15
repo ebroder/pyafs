@@ -21,6 +21,7 @@ cdef import from "afs/ptuser.h":
     int ubik_PR_INewEntry(ubik_client *, afs_int32, char *, afs_int32, afs_int32)
     int ubik_PR_NewEntry(ubik_client *, afs_int32, char *, afs_int32, afs_int32, afs_int32 *)
     int ubik_PR_Delete(ubik_client *, afs_int32, afs_int32)
+    int ubik_PR_AddToGroup(ubik_client *, afs_int32, afs_int32, afs_int32)
 
 cdef import from "afs/pterror.h":
     enum:
@@ -221,3 +222,13 @@ cdef class PTS:
         code = ubik_PR_Delete(self.client, 0, id)
         if code != 0:
             raise Exception("Failed to delete user: %s" % afs_error_message(code))
+
+    def AddToGroup(self, uid, gid):
+        """
+        Add the user with the given ID to the group with the given ID.
+        """
+        cdef afs_int32 code
+
+        code = ubik_PR_AddToGroup(self.client, 0, uid, gid)
+        if code != 0:
+            raise Exception("Failed to add user to group: %s" % afs_error_message(code))
