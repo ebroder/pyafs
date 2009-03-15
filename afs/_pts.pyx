@@ -32,6 +32,7 @@ cdef import from "afs/ptuser.h":
 cdef import from "afs/pterror.h":
     enum:
         PRNOENT
+        PRTOOMANY
 
     void initialize_PT_error_table()
 
@@ -264,12 +265,15 @@ cdef class PTS:
         alist.prlist_val = NULL
 
         code = ubik_PR_ListElements(self.client, 0, gid, &alist, &over)
+
+        if alist.prlist_val is not NULL:
+            for i in range(alist.prlist_len):
+                members.append(alist.prlist_val[i])
+            free(alist.prlist_val)
+
+        if over:
+            code = PRTOOMANY
         if code != 0:
             raise Exception("Failed to get group membership: %s" % afs_error_message(code))
-
-        for i in range(alist.prlist_len):
-            members.append(alist.prlist_val[i])
-        if alist.prlist_val is not NULL:
-            free(alist.prlist_val)
 
         return members
