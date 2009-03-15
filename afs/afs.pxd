@@ -10,7 +10,7 @@ cdef extern from "string.h":
     void * memset(void *b, int c, size_t n)
 
 cdef extern from "stdlib.h":
-     void * malloc(int size)
+     void * malloc(size_t size)
      void free(void *)
 
 cdef extern from "netinet/in.h":
