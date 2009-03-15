@@ -4,6 +4,12 @@ cdef import from "afs/ptuser.h":
     enum:
         PR_MAXNAMELEN
 
+    enum:
+        PRGRP
+
+    enum:
+        ANONYMOUSID
+
     ctypedef char prname[PR_MAXNAMELEN]
 
     struct namelist:
@@ -151,4 +157,22 @@ cdef class PTS:
 
         if code != 0:
             raise Exception("Failed to create user: %s" % afs_error_message(code))
+        return cid
+
+    def CreateGroup(self, name, owner, id=None):
+        cdef afs_int32 code, cid
+
+        name = name[:PR_MAXNAMELEN].lower()
+        oid = self.NameToId(owner)
+        if oid == ANONYMOUSID:
+            raise Exception("Error creating group: owner does not exist")
+
+        if id is not None:
+            cid = id
+            code = ubik_PR_INewEntry(self.client, 0, name, cid, oid)
+        else:
+            code = ubik_PR_NewEntry(self.client, 0, name, PRGRP, oid, &cid)
+
+        if code != 0:
+            raise Exception("Failed to create group: %s" % afs_error_message(code))
         return cid
