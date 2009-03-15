@@ -30,6 +30,20 @@ cdef class PTS:
     cdef ubik_client * client
 
     def __cinit__(self, cell=None, sec=1):
+        """
+        Open a connection to the protection server. A PTS object is
+        essentially a handle to talk to the server in a given cell.
+
+        cell defaults to None. If no argument is passed for cell, PTS
+        connects to the home cell.
+
+        sec is the security level, an integer from 0 to 3:
+         - 0: unauthenticated connection
+         - 1: try authenticated, then fall back to unauthenticated
+         - 2: fail if an authenticated connection can't be established
+         - 3: same as 2, plus encrypt all traffic to the protection
+           server
+        """
         cdef afs_int32 code
         cdef afsconf_dir *cdir
         cdef afsconf_cell info
@@ -104,6 +118,9 @@ cdef class PTS:
         rx_Finalize()
 
     def NameToId(self, name):
+        """
+        Converts a user or group to an AFS ID.
+        """
         cdef namelist lnames
         cdef idlist lids
         cdef afs_int32 code, id
@@ -123,6 +140,9 @@ cdef class PTS:
         return id
 
     def IdToName(self, id):
+        """
+        Convert an AFS ID to the name of a user or group.
+        """
         cdef namelist lnames
         cdef idlist lids
         cdef afs_int32 code
@@ -144,6 +164,10 @@ cdef class PTS:
         return name
 
     def CreateUser(self, name, id=None):
+        """
+        Create a new user in the protection database. If an ID is
+        provided, that one will be used.
+        """
         cdef afs_int32 code
         cdef afs_int32 cid
         name = name[:PR_MAXNAMELEN].lower()
@@ -161,6 +185,10 @@ cdef class PTS:
         return cid
 
     def CreateGroup(self, name, owner, id=None):
+        """
+        Create a new group in the protection database. If an ID is
+        provided, that one will be used.
+        """
         cdef afs_int32 code, cid
 
         name = name[:PR_MAXNAMELEN].lower()
@@ -179,6 +207,9 @@ cdef class PTS:
         return cid
 
     def Delete(self, id):
+        """
+        Delete the protection database entry with the provided ID.
+        """
         cdef afs_int32 code
 
         code = ubik_PR_Delete(self.client, 0, id)
