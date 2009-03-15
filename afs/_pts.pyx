@@ -38,23 +38,23 @@ cdef import from "afs/pterror.h":
     void initialize_PT_error_table()
 
 cdef class PTS:
+    """
+    A PTS object is essentially a handle to talk to the server in a
+    given cell.
+
+    cell defaults to None. If no argument is passed for cell, PTS
+    connects to the home cell.
+
+    sec is the security level, an integer from 0 to 3:
+      - 0: unauthenticated connection
+      - 1: try authenticated, then fall back to unauthenticated
+      - 2: fail if an authenticated connection can't be established
+      - 3: same as 2, plus encrypt all traffic to the protection
+        server
+    """
     cdef ubik_client * client
 
     def __cinit__(self, cell=None, sec=1):
-        """
-        Open a connection to the protection server. A PTS object is
-        essentially a handle to talk to the server in a given cell.
-
-        cell defaults to None. If no argument is passed for cell, PTS
-        connects to the home cell.
-
-        sec is the security level, an integer from 0 to 3:
-         - 0: unauthenticated connection
-         - 1: try authenticated, then fall back to unauthenticated
-         - 2: fail if an authenticated connection can't be established
-         - 3: same as 2, plus encrypt all traffic to the protection
-           server
-        """
         cdef afs_int32 code
         cdef afsconf_dir *cdir
         cdef afsconf_cell info
