@@ -24,6 +24,7 @@ cdef import from "afs/ptuser.h":
     int ubik_PR_IDToName(ubik_client *, afs_int32, idlist *, namelist *)
     int ubik_PR_INewEntry(ubik_client *, afs_int32, char *, afs_int32, afs_int32)
     int ubik_PR_NewEntry(ubik_client *, afs_int32, char *, afs_int32, afs_int32, afs_int32 *)
+    int ubik_PR_Delete(ubik_client *, afs_int32, afs_int32)
 
 cdef class PTS:
     cdef ubik_client * client
@@ -176,3 +177,10 @@ cdef class PTS:
         if code != 0:
             raise Exception("Failed to create group: %s" % afs_error_message(code))
         return cid
+
+    def Delete(self, id):
+        cdef afs_int32 code
+
+        code = ubik_PR_Delete(self.client, 0, id)
+        if code != 0:
+            raise Exception("Failed to delete user: %s" % afs_error_message(code))
