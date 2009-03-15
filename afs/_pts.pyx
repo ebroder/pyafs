@@ -1,5 +1,22 @@
 from afs cimport *
 
+cdef import from "afs/ptuser.h":
+    enum:
+        PR_MAXNAMELEN
+
+    ctypedef char prname[PR_MAXNAMELEN]
+
+    struct namelist:
+        unsigned int namelist_len
+        prname *namelist_val
+
+    struct idlist:
+        unsigned int idlist_len
+        afs_int32 *idlist_val
+
+    int ubik_PR_NameToID(ubik_client *, afs_int32, namelist *, idlist *)
+    int ubik_PR_IDToName(ubik_client *, afs_int32, idlist *, namelist *)
+
 cdef class PTS:
     cdef ubik_client * client
 
@@ -76,3 +93,43 @@ cdef class PTS:
     def __dealloc__(self):
         ubik_ClientDestroy(self.client)
         rx_Finalize()
+
+    def NameToId(self, name):
+        cdef namelist lnames
+        cdef idlist lids
+        cdef afs_int32 code, id
+        name = name.lower()
+
+        lids.idlist_len = 0
+        lids.idlist_val = NULL
+        lnames.namelist_len = 1
+        lnames.namelist_val = <prname *>malloc(PR_MAXNAMELEN)
+        strncpy(lnames.namelist_val[0], name, PR_MAXNAMELEN)
+        code = ubik_PR_NameToID(self.client, 0, &lnames, &lids)
+        if lids.idlist_val is not NULL:
+            id = lids.idlist_val[0]
+            free(lids.idlist_val)
+        if code != 0:
+            raise Exception("Failed to lookup PTS name: %s" % afs_error_message(code))
+        return id
+
+    def IdToName(self, id):
+        cdef namelist lnames
+        cdef idlist lids
+        cdef afs_int32 code
+        cdef char name[PR_MAXNAMELEN]
+
+        lids.idlist_len = 1
+        lids.idlist_val = <afs_int32 *>malloc(sizeof(afs_int32))
+        lids.idlist_val[0] = id
+        lnames.namelist_len = 0
+        lnames.namelist_val = NULL
+        code = ubik_PR_IDToName(self.client, 0, &lids, &lnames)
+        if lnames.namelist_val is not NULL:
+            strncpy(name, lnames.namelist_val[0], sizeof(name))
+            free(lnames.namelist_val)
+        if lids.idlist_val is not NULL:
+            free(lids.idlist_val)
+        if code != 0:
+            raise Exception("Failed to lookup PTS ID: %s" % afs_error_message(code))
+        return name

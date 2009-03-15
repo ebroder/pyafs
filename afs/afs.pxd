@@ -9,6 +9,10 @@ cdef extern from "string.h":
     char * strncpy(char *s1, char *s2, size_t n)
     void * memset(void *b, int c, size_t n)
 
+cdef extern from "stdlib.h":
+     void * malloc(int size)
+     void free(void *)
+
 cdef extern from "netinet/in.h":
     struct in_addr:
         int s_addr
