@@ -12,6 +12,10 @@ cdef import from "afs/ptuser.h":
         unsigned int namelist_len
         prname *namelist_val
 
+    struct prlist:
+        unsigned int prlist_len
+        afs_int32 *prlist_val
+
     struct idlist:
         unsigned int idlist_len
         afs_int32 *idlist_val
@@ -23,6 +27,7 @@ cdef import from "afs/ptuser.h":
     int ubik_PR_Delete(ubik_client *, afs_int32, afs_int32)
     int ubik_PR_AddToGroup(ubik_client *, afs_int32, afs_int32, afs_int32)
     int ubik_PR_RemoveFromGroup(ubik_client *, afs_int32, afs_int32, afs_int32)
+    int ubik_PR_ListElements(ubik_client *, afs_int32, afs_int32, prlist *, afs_int32 *)
 
 cdef import from "afs/pterror.h":
     enum:
@@ -243,3 +248,28 @@ cdef class PTS:
         code = ubik_PR_RemoveFromGroup(self.client, 0, uid, gid)
         if code != 0:
             raise Exception("Failed to remove user from group: %s" % afs_error_message(code))
+
+    def ListMembers(self, gid):
+        """
+        Get the membership of the list with the given ID.
+
+        This returns a list of PTS IDs.
+        """
+        cdef afs_int32 code, over
+        cdef prlist alist
+        cdef int i
+        cdef object members = []
+
+        alist.prlist_len = 0
+        alist.prlist_val = NULL
+
+        code = ubik_PR_ListElements(self.client, 0, gid, &alist, &over)
+        if code != 0:
+            raise Exception("Failed to get group membership: %s" % afs_error_message(code))
+
+        for i in range(alist.prlist_len):
+            members.append(alist.prlist_val[i])
+        if alist.prlist_val is not NULL:
+            free(alist.prlist_val)
+
+        return members
