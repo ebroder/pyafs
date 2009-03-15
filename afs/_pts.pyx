@@ -40,6 +40,7 @@ cdef import from "afs/ptuser.h":
     int ubik_PR_RemoveFromGroup(ubik_client *, afs_int32, afs_int32, afs_int32)
     int ubik_PR_ListElements(ubik_client *, afs_int32, afs_int32, prlist *, afs_int32 *)
     int ubik_PR_ListOwned(ubik_client *, afs_int32, afs_int32, prlist *, afs_int32 *)
+    int ubik_PR_ListEntry(ubik_client *, afs_int32, afs_int32, prcheckentry *)
 
 cdef import from "afs/pterror.h":
     enum:
@@ -364,3 +365,19 @@ cdef class PTS:
             raise Exception("Failed to get owned entities: %s" % afs_error_message(code))
 
         return owned
+
+    def ListEntry(self, id):
+        """
+        Load a PTEntry instance with information about the provided
+        ID.
+        """
+        cdef afs_int32 code
+        cdef prcheckentry centry
+        cdef object entry = PTEntry()
+
+        code = ubik_PR_ListEntry(self.client, 0, id, &centry)
+        if code != 0:
+            raise Exception("Error getting entity info: %s" % afs_error_message(code))
+
+        _ptentry_from_c(entry, centry)
+        return entry
