@@ -3,11 +3,7 @@ from afs cimport *
 cdef import from "afs/ptuser.h":
     enum:
         PR_MAXNAMELEN
-
-    enum:
         PRGRP
-
-    enum:
         ANONYMOUSID
 
     ctypedef char prname[PR_MAXNAMELEN]
@@ -25,6 +21,12 @@ cdef import from "afs/ptuser.h":
     int ubik_PR_INewEntry(ubik_client *, afs_int32, char *, afs_int32, afs_int32)
     int ubik_PR_NewEntry(ubik_client *, afs_int32, char *, afs_int32, afs_int32, afs_int32 *)
     int ubik_PR_Delete(ubik_client *, afs_int32, afs_int32)
+
+cdef import from "afs/pterror.h":
+    enum:
+        PRNOENT
+
+    void initialize_PT_error_table()
 
 cdef class PTS:
     cdef ubik_client * client
@@ -53,6 +55,8 @@ cdef class PTS:
         cdef rx_securityClass *sc
         cdef rx_connection *serverconns[MAXSERVERS]
         cdef int i
+
+        initialize_PT_error_table()
 
         if cell is None:
             c_cell = NULL
@@ -135,6 +139,8 @@ cdef class PTS:
         if lids.idlist_val is not NULL:
             id = lids.idlist_val[0]
             free(lids.idlist_val)
+        if id == ANONYMOUSID:
+            code = PRNOENT
         if code != 0:
             raise Exception("Failed to lookup PTS name: %s" % afs_error_message(code))
         return id
@@ -159,6 +165,8 @@ cdef class PTS:
             free(lnames.namelist_val)
         if lids.idlist_val is not NULL:
             free(lids.idlist_val)
+        if name == str(id):
+            code = PRNOENT
         if code != 0:
             raise Exception("Failed to lookup PTS ID: %s" % afs_error_message(code))
         return name
@@ -193,8 +201,6 @@ cdef class PTS:
 
         name = name[:PR_MAXNAMELEN].lower()
         oid = self.NameToId(owner)
-        if oid == ANONYMOUSID:
-            raise Exception("Error creating group: owner does not exist")
 
         if id is not None:
             cid = id
