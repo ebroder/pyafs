@@ -26,7 +26,6 @@ cdef import from "afs/ptuser.h":
         afs_int32 owner
         afs_int32 creator
         afs_int32 ngroups
-        afs_int32 nusers
         afs_int32 count
         afs_int32 reserved[5]
         char name[PR_MAXNAMELEN]
@@ -55,7 +54,6 @@ cdef class PTEntry:
     cdef public afs_int32 owner
     cdef public afs_int32 creator
     cdef public afs_int32 ngroups
-    cdef public afs_int32 nusers
     cdef public afs_int32 count
     cdef afs_int32 reserved[5]
     cdef public char * name
@@ -70,7 +68,6 @@ cdef int _ptentry_from_c(PTEntry p_entry, prcheckentry c_entry) except -1:
     p_entry.owner = c_entry.owner
     p_entry.creator = c_entry.creator
     p_entry.ngroups = c_entry.ngroups
-    p_entry.nusers = c_entry.nusers
     p_entry.count = c_entry.count
     memcpy(p_entry.reserved, c_entry.reserved, sizeof(p_entry.reserved))
     p_entry.name = c_entry.name
@@ -86,7 +83,6 @@ cdef int _ptentry_to_c(prcheckentry * c_entry, PTEntry p_entry) except -1:
     c_entry.owner = p_entry.owner
     c_entry.creator = p_entry.creator
     c_entry.ngroups = p_entry.ngroups
-    c_entry.nusers = p_entry.nusers
     c_entry.count = p_entry.count
     memcpy(c_entry.reserved, p_entry.reserved, sizeof(p_entry.reserved))
     strncpy(c_entry.name, p_entry.name, sizeof(c_entry.name))
