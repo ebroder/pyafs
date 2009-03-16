@@ -41,6 +41,7 @@ cdef import from "afs/ptuser.h":
     int ubik_PR_ChangeEntry(ubik_client *, afs_int32, afs_int32, char *, afs_int32, afs_int32)
     int ubik_PR_IsAMemberOf(ubik_client *, afs_int32, afs_int32, afs_int32, afs_int32 *)
     int ubik_PR_ListMax(ubik_client *, afs_int32, afs_int32 *, afs_int32 *)
+    int ubik_PR_SetMax(ubik_client *, afs_int32, afs_int32, afs_int32)
 
 cdef import from "afs/pterror.h":
     enum:
@@ -421,3 +422,25 @@ cdef class PTS:
             raise Exception("Error looking up max uid/gid: %s" % afs_error_message(code))
 
         return (uid, gid)
+
+    def SetMaxUserId(self, id):
+        """
+        Set the maximum currently assigned user ID (the next
+        automatically assigned UID will be id + 1)
+        """
+        cdef afs_int32 code
+
+        code = ubik_PR_SetMax(self.client, 0, id, 0)
+        if code != 0:
+            raise Exception("Error setting max uid: %s" % afs_error_message(code))
+
+    def SetMaxGroupId(self, id):
+        """
+        Set the maximum currently assigned user ID (the next
+        automatically assigned UID will be id + 1)
+        """
+        cdef afs_int32 code
+
+        code = ubik_PR_SetMax(self.client, 0, id, PRGRP)
+        if code != 0:
+            raise Exception("Error setting max gid: %s" % afs_error_message(code))
