@@ -38,6 +38,7 @@ cdef import from "afs/ptuser.h":
     int ubik_PR_ListElements(ubik_client *, afs_int32, afs_int32, prlist *, afs_int32 *)
     int ubik_PR_ListOwned(ubik_client *, afs_int32, afs_int32, prlist *, afs_int32 *)
     int ubik_PR_ListEntry(ubik_client *, afs_int32, afs_int32, prcheckentry *)
+    int ubik_PR_ChangeEntry(ubik_client *, afs_int32, afs_int32, char *, afs_int32, afs_int32)
 
 cdef import from "afs/pterror.h":
     enum:
@@ -369,3 +370,26 @@ cdef class PTS:
 
         _ptentry_from_c(entry, centry)
         return entry
+
+    def ChangeEntry(self, id, newname=None, newid=None, newoid=None):
+        """
+        Change the name, ID, and/or owner of a PTS entity.
+
+        For any of newname, newid, and newoid which aren't specified
+        or ar None, the value isn't changed.
+        """
+        cdef afs_int32 code
+        cdef afs_int32 c_newid = 0, c_newoid = 0
+        cdef char * c_newname
+
+        if newname is None:
+            newname = self.IdToName(id)
+        c_newname = newname
+        if newid is not None:
+            c_newid = newid
+        if newoid is not None:
+            c_newoid = newoid
+
+        code = ubik_PR_ChangeEntry(self.client, 0, id, c_newname, c_newoid, c_newid)
+        if code != 0:
+            raise Exception("Error changing entity info: %s" % afs_error_message(code))
