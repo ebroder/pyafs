@@ -26,6 +26,7 @@ cdef import from "afs/ptuser.h":
         afs_int32 owner
         afs_int32 creator
         afs_int32 ngroups
+        afs_int32 nusers
         afs_int32 count
 
     int ubik_PR_NameToID(ubik_client *, afs_int32, namelist *, idlist *)
@@ -56,6 +57,7 @@ cdef class PTEntry:
     cdef public afs_int32 owner
     cdef public afs_int32 creator
     cdef public afs_int32 ngroups
+    cdef public afs_int32 nusers
     cdef public afs_int32 count
 
 cdef int _ptentry_from_c(PTEntry p_entry, prcheckentry c_entry) except -1:
@@ -68,6 +70,7 @@ cdef int _ptentry_from_c(PTEntry p_entry, prcheckentry c_entry) except -1:
     p_entry.owner = c_entry.owner
     p_entry.creator = c_entry.creator
     p_entry.ngroups = c_entry.ngroups
+    p_entry.nusers = c_entry.nusers
     p_entry.count = c_entry.count
     return 0
 
@@ -81,6 +84,7 @@ cdef int _ptentry_to_c(prcheckentry * c_entry, PTEntry p_entry) except -1:
     c_entry.owner = p_entry.owner
     c_entry.creator = p_entry.creator
     c_entry.ngroups = p_entry.ngroups
+    c_entry.nusers = p_entry.nusers
     c_entry.count = p_entry.count
     return 0
 
