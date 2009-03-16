@@ -39,6 +39,7 @@ cdef import from "afs/ptuser.h":
     int ubik_PR_ListOwned(ubik_client *, afs_int32, afs_int32, prlist *, afs_int32 *)
     int ubik_PR_ListEntry(ubik_client *, afs_int32, afs_int32, prcheckentry *)
     int ubik_PR_ChangeEntry(ubik_client *, afs_int32, afs_int32, char *, afs_int32, afs_int32)
+    int ubik_PR_IsAMemberOf(ubik_client *, afs_int32, afs_int32, afs_int32, afs_int32 *)
 
 cdef import from "afs/pterror.h":
     enum:
@@ -393,3 +394,16 @@ cdef class PTS:
         code = ubik_PR_ChangeEntry(self.client, 0, id, c_newname, c_newoid, c_newid)
         if code != 0:
             raise Exception("Error changing entity info: %s" % afs_error_message(code))
+
+    def IsAMemberOf(self, uid, gid):
+        """
+        Return True if the given uid is a member of the given gid.
+        """
+        cdef afs_int32 code
+        cdef afs_int32 flag
+
+        code = ubik_PR_IsAMemberOf(self.client, 0, uid, gid, &flag)
+        if code != 0:
+            raise Exception("Error testing membership: %s" % afs_error_message(code))
+
+        return bool(flag)
