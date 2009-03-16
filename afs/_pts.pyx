@@ -40,6 +40,7 @@ cdef import from "afs/ptuser.h":
     int ubik_PR_ListEntry(ubik_client *, afs_int32, afs_int32, prcheckentry *)
     int ubik_PR_ChangeEntry(ubik_client *, afs_int32, afs_int32, char *, afs_int32, afs_int32)
     int ubik_PR_IsAMemberOf(ubik_client *, afs_int32, afs_int32, afs_int32, afs_int32 *)
+    int ubik_PR_ListMax(ubik_client *, afs_int32, afs_int32 *, afs_int32 *)
 
 cdef import from "afs/pterror.h":
     enum:
@@ -407,3 +408,16 @@ cdef class PTS:
             raise Exception("Error testing membership: %s" % afs_error_message(code))
 
         return bool(flag)
+
+    def ListMax(self):
+        """
+        Return a tuple of the maximum user ID and the maximum group
+        ID currently assigned.
+        """
+        cdef afs_int32 code, uid, gid
+
+        code = ubik_PR_ListMax(self.client, 0, &uid, &gid)
+        if code != 0:
+            raise Exception("Error looking up max uid/gid: %s" % afs_error_message(code))
+
+        return (uid, gid)
