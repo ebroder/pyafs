@@ -7,6 +7,9 @@ cdef import from "afs/ptuser.h":
         PRUSERS
         PRGROUPS
         ANONYMOUSID
+        PR_SF_ALLBITS
+        PR_SF_NGROUPS
+        PR_SF_NUSERS
 
     ctypedef char prname[PR_MAXNAMELEN]
 
@@ -61,6 +64,7 @@ cdef import from "afs/ptuser.h":
     int ubik_PR_ListMax(ubik_client *, afs_int32, afs_int32 *, afs_int32 *)
     int ubik_PR_SetMax(ubik_client *, afs_int32, afs_int32, afs_int32)
     int ubik_PR_ListEntries(ubik_client *, afs_int32, afs_int32, afs_int32, prentries *, afs_int32 *)
+    int ubik_PR_SetFieldsEntry(ubik_client *, afs_int32, afs_int32, afs_int32, afs_int32, afs_int32, afs_int32, afs_int32, afs_int32)
 
 cdef import from "afs/pterror.h":
     enum:
@@ -544,3 +548,29 @@ cdef class PTS:
             startindex = nextstartindex
 
         return entries
+
+    def SetFields(self, id, access=None, groups=None, users=None):
+        """
+        Update the fields for an entry.
+
+        Valid fields are the privacy flags (access), the group quota
+        (groups), or the "foreign user quota" (users), which doesn't
+        actually seem to do anything, but is included for
+        completeness.
+        """
+        cdef afs_int32 code
+        cdef afs_int32 mask = 0, flags = 0, nusers = 0, ngroups = 0
+
+        if access is not None:
+            flags = access
+            mask |= PR_SF_ALLBITS
+        if groups is not None:
+            ngroups = groups
+            mask |= PR_SF_NGROUPS
+        if users is not None:
+            nusers = users
+            mask |= PR_SF_NGROUPS
+
+        code = ubik_PR_SetFieldsEntry(self.client, 0, id, mask, flags, ngroups, nusers, 0, 0)
+        if code != 0:
+            raise Exception("Unable to set fields: %s" % afs_error_message(code))
