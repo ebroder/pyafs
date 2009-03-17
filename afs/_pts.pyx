@@ -80,7 +80,10 @@ cdef class PTEntry:
     cdef public object name
 
     def __repr__(self):
-        return '<PTEntry: %s>' % self.id
+        if self.name != '':
+            return '<PTEntry: %s>' % self.name
+        else:
+            return '<PTEntry: PTS ID %s>' % self.id
 
 cdef int _ptentry_from_checkentry(PTEntry p_entry, prcheckentry c_entry) except -1:
     if p_entry is None:
