@@ -4,6 +4,8 @@ cdef import from "afs/ptuser.h":
     enum:
         PR_MAXNAMELEN
         PRGRP
+        PRUSERS
+        PRGROUPS
         ANONYMOUSID
 
     ctypedef char prname[PR_MAXNAMELEN]
@@ -29,6 +31,19 @@ cdef import from "afs/ptuser.h":
         afs_int32 nusers
         afs_int32 count
 
+    struct prlistentries:
+        afs_int32 flags
+        afs_int32 id
+        afs_int32 owner
+        afs_int32 creator
+        afs_int32 ngroups
+        afs_int32 nusers
+        afs_int32 count
+
+    struct prentries:
+        unsigned int prentries_len
+        prlistentries *prentries_val
+
     int ubik_PR_NameToID(ubik_client *, afs_int32, namelist *, idlist *)
     int ubik_PR_IDToName(ubik_client *, afs_int32, idlist *, namelist *)
     int ubik_PR_INewEntry(ubik_client *, afs_int32, char *, afs_int32, afs_int32)
@@ -43,6 +58,7 @@ cdef import from "afs/ptuser.h":
     int ubik_PR_IsAMemberOf(ubik_client *, afs_int32, afs_int32, afs_int32, afs_int32 *)
     int ubik_PR_ListMax(ubik_client *, afs_int32, afs_int32 *, afs_int32 *)
     int ubik_PR_SetMax(ubik_client *, afs_int32, afs_int32, afs_int32)
+    int ubik_PR_ListEntries(ubik_client *, afs_int32, afs_int32, afs_int32, prentries *, afs_int32 *)
 
 cdef import from "afs/pterror.h":
     enum:
@@ -60,7 +76,7 @@ cdef class PTEntry:
     cdef public afs_int32 nusers
     cdef public afs_int32 count
 
-cdef int _ptentry_from_c(PTEntry p_entry, prcheckentry c_entry) except -1:
+cdef int _ptentry_from_checkentry(PTEntry p_entry, prcheckentry c_entry) except -1:
     if p_entry is None:
         raise TypeError
         return -1
@@ -74,7 +90,35 @@ cdef int _ptentry_from_c(PTEntry p_entry, prcheckentry c_entry) except -1:
     p_entry.count = c_entry.count
     return 0
 
-cdef int _ptentry_to_c(prcheckentry * c_entry, PTEntry p_entry) except -1:
+cdef int _ptentry_to_checkentry(prcheckentry * c_entry, PTEntry p_entry) except -1:
+    if p_entry is None:
+        raise TypeError
+        return -1
+
+    c_entry.flags = p_entry.flags
+    c_entry.id = p_entry.id
+    c_entry.owner = p_entry.owner
+    c_entry.creator = p_entry.creator
+    c_entry.ngroups = p_entry.ngroups
+    c_entry.nusers = p_entry.nusers
+    c_entry.count = p_entry.count
+    return 0
+
+cdef int _ptentry_from_listentry(PTEntry p_entry, prlistentries c_entry) except -1:
+    if p_entry is None:
+        raise TypeError
+        return -1
+
+    p_entry.flags = c_entry.flags
+    p_entry.id = c_entry.id
+    p_entry.owner = c_entry.owner
+    p_entry.creator = c_entry.creator
+    p_entry.ngroups = c_entry.ngroups
+    p_entry.nusers = c_entry.nusers
+    p_entry.count = c_entry.count
+    return 0
+
+cdef int _ptentry_to_listentry(prlistentries * c_entry, PTEntry p_entry) except -1:
     if p_entry is None:
         raise TypeError
         return -1
@@ -375,7 +419,7 @@ cdef class PTS:
         if code != 0:
             raise Exception("Error getting entity info: %s" % afs_error_message(code))
 
-        _ptentry_from_c(entry, centry)
+        _ptentry_from_checkentry(entry, centry)
         return entry
 
     def ChangeEntry(self, id, newname=None, newid=None, newoid=None):
@@ -448,3 +492,42 @@ cdef class PTS:
         code = ubik_PR_SetMax(self.client, 0, id, PRGRP)
         if code != 0:
             raise Exception("Error setting max gid: %s" % afs_error_message(code))
+
+    def ListEntries(self, users=None, groups=None):
+        """
+        Return a list of PTEntry instances representing all entries in
+        the PRDB.
+
+        Returns just users by default, but can return just users, just
+        groups, or both.
+        """
+        cdef afs_int32 code
+        cdef afs_int32 flag = 0, startindex = 0, nentries, nextstartindex
+        cdef prentries centries
+        cdef unsigned int i
+
+        cdef object entries = []
+
+        if groups is None or users is True:
+            flag |= PRUSERS
+        if groups:
+            flag |= PRGROUPS
+
+        while startindex != -1:
+            centries.prentries_val = NULL
+            centries.prentries_len = 0
+            nextstartindex = -1
+
+            code = ubik_PR_ListEntries(self.client, 0, flag, startindex, &centries, &nextstartindex)
+            if centries.prentries_val is not NULL:
+                for i in range(centries.prentries_len):
+                    e = PTEntry()
+                    _ptentry_from_listentry(e, centries.prentries_val[i])
+                    entries.append(e)
+                free(centries.prentries_val)
+            if code != 0:
+                raise Exception("Unable to list entries: %s" % afs_error_message(code))
+
+            startindex = nextstartindex
+
+        return entries
