@@ -30,6 +30,7 @@ cdef import from "afs/ptuser.h":
         afs_int32 ngroups
         afs_int32 nusers
         afs_int32 count
+        char name[PR_MAXNAMELEN]
 
     struct prlistentries:
         afs_int32 flags
@@ -39,6 +40,7 @@ cdef import from "afs/ptuser.h":
         afs_int32 ngroups
         afs_int32 nusers
         afs_int32 count
+        char name[PR_MAXNAMELEN]
 
     struct prentries:
         unsigned int prentries_len
@@ -75,6 +77,7 @@ cdef class PTEntry:
     cdef public afs_int32 ngroups
     cdef public afs_int32 nusers
     cdef public afs_int32 count
+    cdef public object name
 
     def __repr__(self):
         return '<PTEntry: %s>' % self.id
@@ -91,6 +94,7 @@ cdef int _ptentry_from_checkentry(PTEntry p_entry, prcheckentry c_entry) except 
     p_entry.ngroups = c_entry.ngroups
     p_entry.nusers = c_entry.nusers
     p_entry.count = c_entry.count
+    p_entry.name = c_entry.name
     return 0
 
 cdef int _ptentry_to_checkentry(prcheckentry * c_entry, PTEntry p_entry) except -1:
@@ -105,6 +109,7 @@ cdef int _ptentry_to_checkentry(prcheckentry * c_entry, PTEntry p_entry) except 
     c_entry.ngroups = p_entry.ngroups
     c_entry.nusers = p_entry.nusers
     c_entry.count = p_entry.count
+    strncpy(c_entry.name, p_entry.name, sizeof(c_entry.name))
     return 0
 
 cdef int _ptentry_from_listentry(PTEntry p_entry, prlistentries c_entry) except -1:
@@ -119,6 +124,7 @@ cdef int _ptentry_from_listentry(PTEntry p_entry, prlistentries c_entry) except 
     p_entry.ngroups = c_entry.ngroups
     p_entry.nusers = c_entry.nusers
     p_entry.count = c_entry.count
+    p_entry.name = c_entry.name
     return 0
 
 cdef int _ptentry_to_listentry(prlistentries * c_entry, PTEntry p_entry) except -1:
@@ -133,6 +139,7 @@ cdef int _ptentry_to_listentry(prlistentries * c_entry, PTEntry p_entry) except 
     c_entry.ngroups = p_entry.ngroups
     c_entry.nusers = p_entry.nusers
     c_entry.count = p_entry.count
+    strncpy(c_entry.name, p_entry.name, sizeof(c_entry.name))
     return 0
 
 cdef class PTS:
