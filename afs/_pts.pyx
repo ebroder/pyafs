@@ -76,6 +76,9 @@ cdef class PTEntry:
     cdef public afs_int32 nusers
     cdef public afs_int32 count
 
+    def __repr__(self):
+        return '<PTEntry: %s>' % self.id
+
 cdef int _ptentry_from_checkentry(PTEntry p_entry, prcheckentry c_entry) except -1:
     if p_entry is None:
         raise TypeError
