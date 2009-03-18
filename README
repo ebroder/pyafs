@@ -3,16 +3,16 @@ Installing PyAFS
 ================
 
 To install PyAFS, you will first need to install Cython_, which you
-can do by running:
+can do by running::
 
   $ easy_install Cython
 
-Once you've done that, to install PyAFS globally, run
+Once you've done that, to install PyAFS globally, run::
 
   $ python setup.py install
 
 If you want to build PyAFS without installing it globally, you may
-want to run:
+want to run::
 
   $ python setup.py build_ext --inplace
 
