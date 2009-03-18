@@ -302,7 +302,7 @@ cdef class PTS:
         cdef afs_int32 code, cid
 
         name = name[:PR_MAXNAMELEN].lower()
-        oid = self.NameToId(owner)
+        oid = self.NameOrId(owner)
 
         if id is not None:
             cid = id
@@ -314,45 +314,49 @@ cdef class PTS:
             raise Exception("Failed to create group: %s" % afs_error_message(code))
         return cid
 
-    def Delete(self, id):
+    def Delete(self, ident):
         """
-        Delete the protection database entry with the provided ID.
+        Delete the protection database entry with the provided
+        identifier.
         """
         cdef afs_int32 code
+        cdef afs_int32 id = self.NameOrId(ident)
 
         code = ubik_PR_Delete(self.client, 0, id)
         if code != 0:
             raise Exception("Failed to delete user: %s" % afs_error_message(code))
 
-    def AddToGroup(self, uid, gid):
+    def AddToGroup(self, user, group):
         """
-        Add the user with the given ID to the group with the given ID.
+        Add the given user to the given group.
         """
         cdef afs_int32 code
+        cdef afs_int32 uid = self.NameOrId(user), gid = self.NameOrId(group)
 
         code = ubik_PR_AddToGroup(self.client, 0, uid, gid)
         if code != 0:
             raise Exception("Failed to add user to group: %s" % afs_error_message(code))
 
-    def RemoveFromGroup(self, uid, gid):
+    def RemoveFromGroup(self, user, group):
         """
-        Remove the user with the given ID from the group with the given ID.
+        Remove the given user from the given group.
         """
         cdef afs_int32 code
+        cdef afs_int32 uid = self.NameOrId(user), gid = self.NameOrId(group)
 
         code = ubik_PR_RemoveFromGroup(self.client, 0, uid, gid)
         if code != 0:
             raise Exception("Failed to remove user from group: %s" % afs_error_message(code))
 
-    def ListMembers(self, id):
+    def ListMembers(self, ident):
         """
         Get the membership of an entity.
 
-        If id is a group ID, this returns the users that are in that
+        If id is a group, this returns the users that are in that
         group.
 
-        If id is a user ID, this returns the list of groups that user
-        is on.
+        If id is a user, this returns the list of groups that user is
+        on.
 
         This returns a list of PTS IDs.
         """
@@ -360,6 +364,8 @@ cdef class PTS:
         cdef prlist alist
         cdef int i
         cdef object members = []
+
+        cdef afs_int32 id = self.NameOrId(ident)
 
         alist.prlist_len = 0
         alist.prlist_val = NULL
@@ -378,7 +384,7 @@ cdef class PTS:
 
         return members
 
-    def ListOwned(self, oid):
+    def ListOwned(self, owner):
         """
         Get all groups owned by an entity.
         """
@@ -386,6 +392,8 @@ cdef class PTS:
         cdef prlist alist
         cdef int i
         cdef object owned = []
+
+        cdef afs_int32 oid = self.NameOrId(owner)
 
         alist.prlist_len = 0
         alist.prlist_val = NULL
@@ -404,14 +412,16 @@ cdef class PTS:
 
         return owned
 
-    def ListEntry(self, id):
+    def ListEntry(self, ident):
         """
         Load a PTEntry instance with information about the provided
-        ID.
+        entity.
         """
         cdef afs_int32 code
         cdef prcheckentry centry
         cdef object entry = PTEntry()
+
+        cdef afs_int32 id = self.NameOrId(ident)
 
         code = ubik_PR_ListEntry(self.client, 0, id, &centry)
         if code != 0:
@@ -420,7 +430,7 @@ cdef class PTS:
         _ptentry_from_c(entry, &centry)
         return entry
 
-    def ChangeEntry(self, id, newname=None, newid=None, newoid=None):
+    def ChangeEntry(self, ident, newname=None, newid=None, newoid=None):
         """
         Change the name, ID, and/or owner of a PTS entity.
 
@@ -430,6 +440,8 @@ cdef class PTS:
         cdef afs_int32 code
         cdef afs_int32 c_newid = 0, c_newoid = 0
         cdef char * c_newname
+
+        cdef afs_int32 id = self.NameOrId(ident)
 
         if newname is None:
             newname = self.IdToName(id)
@@ -443,12 +455,14 @@ cdef class PTS:
         if code != 0:
             raise Exception("Error changing entity info: %s" % afs_error_message(code))
 
-    def IsAMemberOf(self, uid, gid):
+    def IsAMemberOf(self, user, group):
         """
-        Return True if the given uid is a member of the given gid.
+        Return True if the given user is a member of the given group.
         """
         cdef afs_int32 code
         cdef afs_int32 flag
+
+        cdef afs_int32 uid = self.NameOrId(user), gid = self.NameOrId(group)
 
         code = ubik_PR_IsAMemberOf(self.client, 0, uid, gid, &flag)
         if code != 0:
@@ -530,7 +544,7 @@ cdef class PTS:
 
         return entries
 
-    def SetFields(self, id, access=None, groups=None, users=None):
+    def SetFields(self, ident, access=None, groups=None, users=None):
         """
         Update the fields for an entry.
 
@@ -541,6 +555,8 @@ cdef class PTS:
         """
         cdef afs_int32 code
         cdef afs_int32 mask = 0, flags = 0, nusers = 0, ngroups = 0
+
+        cdef afs_int32 id = self.NameOrId(ident)
 
         if access is not None:
             flags = access
