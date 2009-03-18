@@ -20,6 +20,14 @@ library_dirs = ['%s/lib' % root,
 libraries = ['afsauthent', 'afsrpc', 'afsutil', 'resolv']
 define_macros = [('AFS_PTHREAD_ENV', None)]
 
+def PyAFSExtension(module):
+    return Extension(module,
+                     ["%s.pyx" % module.replace('.', '/')],
+                     libraries=libraries,
+                     include_dirs=include_dirs,
+                     library_dirs=library_dirs,
+                     define_macros=define_macros)
+
 setup(
     name="PyAFS",
     version="0.0.0",
@@ -30,18 +38,8 @@ setup(
     requires=['Cython'],
     packages=find_packages(),
     ext_modules=[
-        Extension("afs._pts",
-                  ["afs/_pts.pyx"],
-                  libraries=libraries,
-                  include_dirs=include_dirs,
-                  library_dirs=library_dirs,
-                  define_macros=define_macros),
-        Extension("afs.afs",
-                  ["afs/afs.pyx"],
-                  libraries=libraries,
-                  include_dirs=include_dirs,
-                  library_dirs=library_dirs,
-                  define_macros=define_macros)
+        PyAFSExtension("afs.afs"),
+        PyAFSExtension("afs._pts"),
         ],
     cmdclass= {"build_ext": build_ext}
 )
