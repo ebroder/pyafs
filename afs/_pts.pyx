@@ -1,4 +1,5 @@
 from afs cimport *
+from afs import pyafs_error
 
 cdef import from "afs/ptuser.h":
     enum:
@@ -164,8 +165,7 @@ cdef class PTS:
                           "Error opening configuration directory (%s): %s" % \
                               (AFSDIR_CLIENT_ETC_DIRPATH, strerror(errno)))
         code = afsconf_GetCellInfo(cdir, c_cell, "afsprot", &info)
-        if code != 0:
-            raise Exception(code, "GetCellInfo: %s" % afs_error_message(code))
+        pyafs_error(code)
 
         if sec > 0:
             strncpy(prin.cell, info.name, sizeof(prin.cell))
@@ -176,7 +176,7 @@ cdef class PTS:
             if code != 0:
                 if sec >= 2:
                     # No really - we wanted authentication
-                    raise Exception(code, "Failed to get token for service AFS: %s" % afs_error_message(code))
+                    pyafs_error(code)
                 sec = 0
             else:
                 if sec == 3:
@@ -201,8 +201,7 @@ cdef class PTS:
                                               sec)
 
         code = ubik_ClientInit(serverconns, &self.client)
-        if code != 0:
-            raise Exception("Failed to initialize ubik connection to Protection server: %s" % afs_error_message(code))
+        pyafs_error(code)
 
         code = rxs_Release(sc)
 
@@ -241,8 +240,7 @@ cdef class PTS:
             free(lids.idlist_val)
         if id == ANONYMOUSID:
             code = PRNOENT
-        if code != 0:
-            raise Exception("Failed to lookup PTS name: %s" % afs_error_message(code))
+        pyafs_error(code)
         return id
 
     def IdToName(self, id):
@@ -267,8 +265,7 @@ cdef class PTS:
             free(lids.idlist_val)
         if name == str(id):
             code = PRNOENT
-        if code != 0:
-            raise Exception("Failed to lookup PTS ID: %s" % afs_error_message(code))
+        pyafs_error(code)
         return name
 
     def CreateUser(self, name, id=None):
@@ -288,8 +285,7 @@ cdef class PTS:
         else:
             code = ubik_PR_NewEntry(self.client, 0, name, 0, 0, &cid)
 
-        if code != 0:
-            raise Exception("Failed to create user: %s" % afs_error_message(code))
+        pyafs_error(code)
         return cid
 
     def CreateGroup(self, name, owner, id=None):
@@ -308,8 +304,7 @@ cdef class PTS:
         else:
             code = ubik_PR_NewEntry(self.client, 0, name, PRGRP, oid, &cid)
 
-        if code != 0:
-            raise Exception("Failed to create group: %s" % afs_error_message(code))
+        pyafs_error(code)
         return cid
 
     def Delete(self, ident):
@@ -321,8 +316,7 @@ cdef class PTS:
         cdef afs_int32 id = self.NameOrId(ident)
 
         code = ubik_PR_Delete(self.client, 0, id)
-        if code != 0:
-            raise Exception("Failed to delete user: %s" % afs_error_message(code))
+        pyafs_error(code)
 
     def AddToGroup(self, user, group):
         """
@@ -332,8 +326,7 @@ cdef class PTS:
         cdef afs_int32 uid = self.NameOrId(user), gid = self.NameOrId(group)
 
         code = ubik_PR_AddToGroup(self.client, 0, uid, gid)
-        if code != 0:
-            raise Exception("Failed to add user to group: %s" % afs_error_message(code))
+        pyafs_error(code)
 
     def RemoveFromGroup(self, user, group):
         """
@@ -343,8 +336,7 @@ cdef class PTS:
         cdef afs_int32 uid = self.NameOrId(user), gid = self.NameOrId(group)
 
         code = ubik_PR_RemoveFromGroup(self.client, 0, uid, gid)
-        if code != 0:
-            raise Exception("Failed to remove user from group: %s" % afs_error_message(code))
+        pyafs_error(code)
 
     def ListMembers(self, ident):
         """
@@ -377,8 +369,7 @@ cdef class PTS:
 
         if over:
             code = PRTOOMANY
-        if code != 0:
-            raise Exception("Failed to get group membership: %s" % afs_error_message(code))
+        pyafs_error(code)
 
         return members
 
@@ -405,8 +396,7 @@ cdef class PTS:
 
         if over:
             code = PRTOOMANY
-        if code != 0:
-            raise Exception("Failed to get owned entities: %s" % afs_error_message(code))
+        pyafs_error(code)
 
         return owned
 
@@ -422,8 +412,7 @@ cdef class PTS:
         cdef afs_int32 id = self.NameOrId(ident)
 
         code = ubik_PR_ListEntry(self.client, 0, id, &centry)
-        if code != 0:
-            raise Exception("Error getting entity info: %s" % afs_error_message(code))
+        pyafs_error(code)
 
         _ptentry_from_c(entry, &centry)
         return entry
@@ -450,8 +439,7 @@ cdef class PTS:
             c_newoid = newoid
 
         code = ubik_PR_ChangeEntry(self.client, 0, id, c_newname, c_newoid, c_newid)
-        if code != 0:
-            raise Exception("Error changing entity info: %s" % afs_error_message(code))
+        pyafs_error(code)
 
     def IsAMemberOf(self, user, group):
         """
@@ -463,8 +451,7 @@ cdef class PTS:
         cdef afs_int32 uid = self.NameOrId(user), gid = self.NameOrId(group)
 
         code = ubik_PR_IsAMemberOf(self.client, 0, uid, gid, &flag)
-        if code != 0:
-            raise Exception("Error testing membership: %s" % afs_error_message(code))
+        pyafs_error(code)
 
         return bool(flag)
 
@@ -476,8 +463,7 @@ cdef class PTS:
         cdef afs_int32 code, uid, gid
 
         code = ubik_PR_ListMax(self.client, 0, &uid, &gid)
-        if code != 0:
-            raise Exception("Error looking up max uid/gid: %s" % afs_error_message(code))
+        pyafs_error(code)
 
         return (uid, gid)
 
@@ -489,8 +475,7 @@ cdef class PTS:
         cdef afs_int32 code
 
         code = ubik_PR_SetMax(self.client, 0, id, 0)
-        if code != 0:
-            raise Exception("Error setting max uid: %s" % afs_error_message(code))
+        pyafs_error(code)
 
     def SetMaxGroupId(self, id):
         """
@@ -500,8 +485,7 @@ cdef class PTS:
         cdef afs_int32 code
 
         code = ubik_PR_SetMax(self.client, 0, id, PRGRP)
-        if code != 0:
-            raise Exception("Error setting max gid: %s" % afs_error_message(code))
+        pyafs_error(code)
 
     def ListEntries(self, users=None, groups=None):
         """
@@ -535,8 +519,7 @@ cdef class PTS:
                     _ptentry_from_c(e, <prcheckentry *>&centries.prentries_val[i])
                     entries.append(e)
                 free(centries.prentries_val)
-            if code != 0:
-                raise Exception("Unable to list entries: %s" % afs_error_message(code))
+            pyafs_error(code)
 
             startindex = nextstartindex
 
@@ -567,5 +550,4 @@ cdef class PTS:
             mask |= PR_SF_NGROUPS
 
         code = ubik_PR_SetFieldsEntry(self.client, 0, id, mask, flags, ngroups, nusers, 0, 0)
-        if code != 0:
-            raise Exception("Unable to set fields: %s" % afs_error_message(code))
+        pyafs_error(code)
