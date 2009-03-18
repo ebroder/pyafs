@@ -134,3 +134,15 @@ cdef extern from "ubik.h":
 
 cdef extern from "afs/com_err.h":
     char * afs_error_message(int)
+
+# All AFS error tables
+cdef extern from "afs/auth.h":
+    void initialize_KTC_error_table()
+cdef extern from "afs/cellconfig.h":
+    void initialize_ACFG_error_table()
+cdef extern from "afs/pterror.h":
+    void initialize_PT_error_table()
+cdef extern from "rx/rxkad.h":
+    void initialize_RXK_error_table()
+cdef extern from "ubik.h":
+    void initialize_U_error_table()

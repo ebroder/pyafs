@@ -71,8 +71,6 @@ cdef import from "afs/pterror.h":
         PRNOENT
         PRTOOMANY
 
-    void initialize_PT_error_table()
-
 cdef class PTEntry:
     cdef public afs_int32 flags
     cdef public afs_int32 id
