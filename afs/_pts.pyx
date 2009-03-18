@@ -89,7 +89,7 @@ cdef class PTEntry:
         else:
             return '<PTEntry: PTS ID %s>' % self.id
 
-cdef int _ptentry_from_checkentry(PTEntry p_entry, prcheckentry c_entry) except -1:
+cdef int _ptentry_from_c(PTEntry p_entry, prcheckentry * c_entry) except -1:
     if p_entry is None:
         raise TypeError
         return -1
@@ -104,37 +104,7 @@ cdef int _ptentry_from_checkentry(PTEntry p_entry, prcheckentry c_entry) except 
     p_entry.name = c_entry.name
     return 0
 
-cdef int _ptentry_to_checkentry(prcheckentry * c_entry, PTEntry p_entry) except -1:
-    if p_entry is None:
-        raise TypeError
-        return -1
-
-    c_entry.flags = p_entry.flags
-    c_entry.id = p_entry.id
-    c_entry.owner = p_entry.owner
-    c_entry.creator = p_entry.creator
-    c_entry.ngroups = p_entry.ngroups
-    c_entry.nusers = p_entry.nusers
-    c_entry.count = p_entry.count
-    strncpy(c_entry.name, p_entry.name, sizeof(c_entry.name))
-    return 0
-
-cdef int _ptentry_from_listentry(PTEntry p_entry, prlistentries c_entry) except -1:
-    if p_entry is None:
-        raise TypeError
-        return -1
-
-    p_entry.flags = c_entry.flags
-    p_entry.id = c_entry.id
-    p_entry.owner = c_entry.owner
-    p_entry.creator = c_entry.creator
-    p_entry.ngroups = c_entry.ngroups
-    p_entry.nusers = c_entry.nusers
-    p_entry.count = c_entry.count
-    p_entry.name = c_entry.name
-    return 0
-
-cdef int _ptentry_to_listentry(prlistentries * c_entry, PTEntry p_entry) except -1:
+cdef int _ptentry_to_c(prcheckentry * c_entry, PTEntry p_entry) except -1:
     if p_entry is None:
         raise TypeError
         return -1
@@ -436,7 +406,7 @@ cdef class PTS:
         if code != 0:
             raise Exception("Error getting entity info: %s" % afs_error_message(code))
 
-        _ptentry_from_checkentry(entry, centry)
+        _ptentry_from_c(entry, &centry)
         return entry
 
     def ChangeEntry(self, id, newname=None, newid=None, newoid=None):
@@ -539,7 +509,7 @@ cdef class PTS:
             if centries.prentries_val is not NULL:
                 for i in range(centries.prentries_len):
                     e = PTEntry()
-                    _ptentry_from_listentry(e, centries.prentries_val[i])
+                    _ptentry_from_c(e, <prcheckentry *>&centries.prentries_val[i])
                     entries.append(e)
                 free(centries.prentries_val)
             if code != 0:
