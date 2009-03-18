@@ -226,7 +226,7 @@ cdef class PTS:
         """
         cdef namelist lnames
         cdef idlist lids
-        cdef afs_int32 code, id
+        cdef afs_int32 code, id = ANONYMOUSID
         name = name.lower()
 
         lids.idlist_len = 0
