@@ -35,6 +35,12 @@ setup(
                   libraries=libraries,
                   include_dirs=include_dirs,
                   library_dirs=library_dirs,
+                  define_macros=define_macros),
+        Extension("afs.afs",
+                  ["afs/afs.pyx"],
+                  libraries=libraries,
+                  include_dirs=include_dirs,
+                  library_dirs=library_dirs,
                   define_macros=define_macros)
         ],
     cmdclass= {"build_ext": build_ext}
