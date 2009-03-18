@@ -212,6 +212,17 @@ cdef class PTS:
         ubik_ClientDestroy(self.client)
         rx_Finalize()
 
+    def NameOrId(self, ident):
+        """
+        Given an identifier, convert it to a PTS ID by looking up the
+        name if it's a string, or otherwise just converting it to an
+        integer.
+        """
+        if isinstance(ident, (str, unicode)):
+            return self.NameToId(ident)
+        else:
+            return int(ident)
+
     def NameToId(self, name):
         """
         Converts a user or group to an AFS ID.
