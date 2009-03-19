@@ -209,7 +209,7 @@ cdef class PTS:
         ubik_ClientDestroy(self.client)
         rx_Finalize()
 
-    def NameOrId(self, ident):
+    def _NameOrId(self, ident):
         """
         Given an identifier, convert it to a PTS ID by looking up the
         name if it's a string, or otherwise just converting it to an
@@ -220,7 +220,7 @@ cdef class PTS:
         else:
             return int(ident)
 
-    def NameToId(self, name):
+    def _NameToId(self, name):
         """
         Converts a user or group to an AFS ID.
         """
@@ -243,7 +243,7 @@ cdef class PTS:
         pyafs_error(code)
         return id
 
-    def IdToName(self, id):
+    def _IdToName(self, id):
         """
         Convert an AFS ID to the name of a user or group.
         """
@@ -268,7 +268,7 @@ cdef class PTS:
         pyafs_error(code)
         return name
 
-    def CreateUser(self, name, id=None):
+    def _CreateUser(self, name, id=None):
         """
         Create a new user in the protection database. If an ID is
         provided, that one will be used.
@@ -288,7 +288,7 @@ cdef class PTS:
         pyafs_error(code)
         return cid
 
-    def CreateGroup(self, name, owner, id=None):
+    def _CreateGroup(self, name, owner, id=None):
         """
         Create a new group in the protection database. If an ID is
         provided, that one will be used.
@@ -307,7 +307,7 @@ cdef class PTS:
         pyafs_error(code)
         return cid
 
-    def Delete(self, ident):
+    def _Delete(self, ident):
         """
         Delete the protection database entry with the provided
         identifier.
@@ -318,7 +318,7 @@ cdef class PTS:
         code = ubik_PR_Delete(self.client, 0, id)
         pyafs_error(code)
 
-    def AddToGroup(self, user, group):
+    def _AddToGroup(self, user, group):
         """
         Add the given user to the given group.
         """
@@ -328,7 +328,7 @@ cdef class PTS:
         code = ubik_PR_AddToGroup(self.client, 0, uid, gid)
         pyafs_error(code)
 
-    def RemoveFromGroup(self, user, group):
+    def _RemoveFromGroup(self, user, group):
         """
         Remove the given user from the given group.
         """
@@ -338,7 +338,7 @@ cdef class PTS:
         code = ubik_PR_RemoveFromGroup(self.client, 0, uid, gid)
         pyafs_error(code)
 
-    def ListMembers(self, ident):
+    def _ListMembers(self, ident):
         """
         Get the membership of an entity.
 
@@ -373,7 +373,7 @@ cdef class PTS:
 
         return members
 
-    def ListOwned(self, owner):
+    def _ListOwned(self, owner):
         """
         Get all groups owned by an entity.
         """
@@ -400,7 +400,7 @@ cdef class PTS:
 
         return owned
 
-    def ListEntry(self, ident):
+    def _ListEntry(self, ident):
         """
         Load a PTEntry instance with information about the provided
         entity.
@@ -417,7 +417,7 @@ cdef class PTS:
         _ptentry_from_c(entry, &centry)
         return entry
 
-    def ChangeEntry(self, ident, newname=None, newid=None, newoid=None):
+    def _ChangeEntry(self, ident, newname=None, newid=None, newoid=None):
         """
         Change the name, ID, and/or owner of a PTS entity.
 
@@ -441,7 +441,7 @@ cdef class PTS:
         code = ubik_PR_ChangeEntry(self.client, 0, id, c_newname, c_newoid, c_newid)
         pyafs_error(code)
 
-    def IsAMemberOf(self, user, group):
+    def _IsAMemberOf(self, user, group):
         """
         Return True if the given user is a member of the given group.
         """
@@ -455,7 +455,7 @@ cdef class PTS:
 
         return bool(flag)
 
-    def ListMax(self):
+    def _ListMax(self):
         """
         Return a tuple of the maximum user ID and the maximum group
         ID currently assigned.
@@ -467,7 +467,7 @@ cdef class PTS:
 
         return (uid, gid)
 
-    def SetMaxUserId(self, id):
+    def _SetMaxUserId(self, id):
         """
         Set the maximum currently assigned user ID (the next
         automatically assigned UID will be id + 1)
@@ -477,7 +477,7 @@ cdef class PTS:
         code = ubik_PR_SetMax(self.client, 0, id, 0)
         pyafs_error(code)
 
-    def SetMaxGroupId(self, id):
+    def _SetMaxGroupId(self, id):
         """
         Set the maximum currently assigned user ID (the next
         automatically assigned UID will be id + 1)
@@ -487,7 +487,7 @@ cdef class PTS:
         code = ubik_PR_SetMax(self.client, 0, id, PRGRP)
         pyafs_error(code)
 
-    def ListEntries(self, users=None, groups=None):
+    def _ListEntries(self, users=None, groups=None):
         """
         Return a list of PTEntry instances representing all entries in
         the PRDB.
@@ -525,7 +525,7 @@ cdef class PTS:
 
         return entries
 
-    def SetFields(self, ident, access=None, groups=None, users=None):
+    def _SetFields(self, ident, access=None, groups=None, users=None):
         """
         Update the fields for an entry.
 
