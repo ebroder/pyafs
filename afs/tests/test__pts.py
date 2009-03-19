@@ -20,5 +20,26 @@ def test_init_other_cell():
     p = PTS('zone.mit.edu')
     assert p.cell == cell, "PTS doesn't initialize to provided cell."
 
+def test_user_name_to_id():
+    p = PTS()
+    name = 'broder'
+    id = p._NameToId(name)
+    assert id == 41803, "PTS can't convert user name to ID."
+    assert p._IdToName(id) == name, "PTS can't convert user ID to name."
+
+def test_group_name_to_id():
+    p = PTS()
+    name = 'system:administrators'
+    id = p._NameToId(name)
+    assert id == -204, "PTS can't convert group name to ID."
+    assert p._IdToName(id) == name, "PTS can't convert group ID to name."
+
+def test_name_or_id():
+    p = PTS()
+    name = 'system:administrators'
+    id = -204
+    assert p._NameOrId(name) == id, "PTS._NameOrId can't identify name."
+    assert p._NameOrId(id) == id, "PTS._NameOrId can't identify ID."
+
 if __name__ == '__main__':
     nose.main()
