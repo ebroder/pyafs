@@ -134,6 +134,7 @@ cdef class PTS:
         server
     """
     cdef ubik_client * client
+    cdef readonly object cell
 
     def __cinit__(self, cell=None, sec=1):
         cdef afs_int32 code
@@ -166,6 +167,8 @@ cdef class PTS:
                               (AFSDIR_CLIENT_ETC_DIRPATH, strerror(errno)))
         code = afsconf_GetCellInfo(cdir, c_cell, "afsprot", &info)
         pyafs_error(code)
+
+        self.cell = info.name
 
         if sec > 0:
             strncpy(prin.cell, info.name, sizeof(prin.cell))
