@@ -219,7 +219,7 @@ cdef class PTS:
         integer.
         """
         if isinstance(ident, (str, unicode)):
-            return self.NameToId(ident)
+            return self._NameToId(ident)
         else:
             return int(ident)
 
@@ -299,7 +299,7 @@ cdef class PTS:
         cdef afs_int32 code, cid
 
         name = name[:PR_MAXNAMELEN].lower()
-        oid = self.NameOrId(owner)
+        oid = self._NameOrId(owner)
 
         if id is not None:
             cid = id
@@ -316,7 +316,7 @@ cdef class PTS:
         identifier.
         """
         cdef afs_int32 code
-        cdef afs_int32 id = self.NameOrId(ident)
+        cdef afs_int32 id = self._NameOrId(ident)
 
         code = ubik_PR_Delete(self.client, 0, id)
         pyafs_error(code)
@@ -326,7 +326,7 @@ cdef class PTS:
         Add the given user to the given group.
         """
         cdef afs_int32 code
-        cdef afs_int32 uid = self.NameOrId(user), gid = self.NameOrId(group)
+        cdef afs_int32 uid = self._NameOrId(user), gid = self._NameOrId(group)
 
         code = ubik_PR_AddToGroup(self.client, 0, uid, gid)
         pyafs_error(code)
@@ -336,7 +336,7 @@ cdef class PTS:
         Remove the given user from the given group.
         """
         cdef afs_int32 code
-        cdef afs_int32 uid = self.NameOrId(user), gid = self.NameOrId(group)
+        cdef afs_int32 uid = self._NameOrId(user), gid = self._NameOrId(group)
 
         code = ubik_PR_RemoveFromGroup(self.client, 0, uid, gid)
         pyafs_error(code)
@@ -358,7 +358,7 @@ cdef class PTS:
         cdef int i
         cdef object members = []
 
-        cdef afs_int32 id = self.NameOrId(ident)
+        cdef afs_int32 id = self._NameOrId(ident)
 
         alist.prlist_len = 0
         alist.prlist_val = NULL
@@ -385,7 +385,7 @@ cdef class PTS:
         cdef int i
         cdef object owned = []
 
-        cdef afs_int32 oid = self.NameOrId(owner)
+        cdef afs_int32 oid = self._NameOrId(owner)
 
         alist.prlist_len = 0
         alist.prlist_val = NULL
@@ -412,7 +412,7 @@ cdef class PTS:
         cdef prcheckentry centry
         cdef object entry = PTEntry()
 
-        cdef afs_int32 id = self.NameOrId(ident)
+        cdef afs_int32 id = self._NameOrId(ident)
 
         code = ubik_PR_ListEntry(self.client, 0, id, &centry)
         pyafs_error(code)
@@ -431,10 +431,10 @@ cdef class PTS:
         cdef afs_int32 c_newid = 0, c_newoid = 0
         cdef char * c_newname
 
-        cdef afs_int32 id = self.NameOrId(ident)
+        cdef afs_int32 id = self._NameOrId(ident)
 
         if newname is None:
-            newname = self.IdToName(id)
+            newname = self._IdToName(id)
         c_newname = newname
         if newid is not None:
             c_newid = newid
@@ -451,7 +451,7 @@ cdef class PTS:
         cdef afs_int32 code
         cdef afs_int32 flag
 
-        cdef afs_int32 uid = self.NameOrId(user), gid = self.NameOrId(group)
+        cdef afs_int32 uid = self._NameOrId(user), gid = self._NameOrId(group)
 
         code = ubik_PR_IsAMemberOf(self.client, 0, uid, gid, &flag)
         pyafs_error(code)
@@ -540,7 +540,7 @@ cdef class PTS:
         cdef afs_int32 code
         cdef afs_int32 mask = 0, flags = 0, nusers = 0, ngroups = 0
 
-        cdef afs_int32 id = self.NameOrId(ident)
+        cdef afs_int32 id = self._NameOrId(ident)
 
         if access is not None:
             flags = access
