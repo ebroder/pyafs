@@ -2,8 +2,12 @@
 Installing PyAFS
 ================
 
-To install PyAFS, you will first need to install Cython_, which you
-can do by running::
+To install PyAFS, you will first need to install Cython_. It's always
+a good idea to install Cython through your package manager, if
+possible. Your system's Cython package may be named ``python-cython``
+or ``cython-py25``. If your package manager doesn't have a package for
+Cython, or if you wish to install Cython by hand anyway, you can do so
+by running::
 
   $ easy_install Cython
 
