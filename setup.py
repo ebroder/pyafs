@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from setuptools import setup, find_packages
+from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
 import sys
@@ -36,7 +36,7 @@ setup(
     author_email="broder@mit.edu",
     license="GPL",
     requires=['Cython'],
-    packages=find_packages(),
+    packages=['afs', 'afs.tests'],
     ext_modules=[
         PyAFSExtension("afs.afs"),
         PyAFSExtension("afs._pts"),
