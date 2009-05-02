@@ -5,9 +5,9 @@ hopefully be a bit more Pythonic in its interface.
 
 The goal is essentially to implement the full set of "high-level" APIs
 provided by the Perl modules in a combination of Python and
-Pyrex. This will typically involve a fairly simple wrapping of the C
-API in a Pyrex module (e.g. afs._pts), and then a higher-level
-wrapping of that Pyrex module in pure Python (e.g. afs.pts).
+Cython. This will typically involve a fairly simple wrapping of the C
+API in a Cython module (e.g. afs._pts), and then a higher-level
+wrapping of that Cython module in pure Python (e.g. afs.pts).
 
 I am depending on patches from other people, beacuse I will not finish
 this on my own. I think I've established enough of the structure that
