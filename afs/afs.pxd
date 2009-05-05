@@ -146,3 +146,20 @@ cdef extern from "rx/rxkad.h":
     void initialize_RXK_error_table()
 cdef extern from "ubik.h":
     void initialize_U_error_table()
+
+cdef extern from "afs/vice.h":
+    struct ViceIoctl:
+        void *cin "in"
+        void *out
+        unsigned short out_size
+        unsigned short in_size
+
+cdef import from "afs/venus.h":
+    enum:
+        # PIOCTLS to Venus that we use
+        VIOCGETAL, VIOC_GETVCXSTATUS2
+
+# pioctl doesn't actually have a header, so we have to define it here
+cdef extern int pioctl(char *, afs_int32, ViceIoctl *, afs_int32)
+cdef int pioctl_read(char *, afs_int32, void *, unsigned short, afs_int32) except -1
+
