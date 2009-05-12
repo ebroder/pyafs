@@ -10,25 +10,27 @@ _canonical = {
     "mail":     "lik",
     "none":     "",
 }
-_char2bit = {
-    'r': READ,
-    'w': WRITE,
-    'i': INSERT,
-    'l': LOOKUP,
-    'd': DELETE,
-    'k': LOCK,
-    'a': ADMINISTER,
-    'A': USR0,
-    'B': USR1,
-    'C': USR2,
-    'D': USR3,
-    'E': USR4,
-    'F': USR5,
-    'G': USR6,
-    'H': USR7,
-}
 
-_bit2char = dict([(v,k) for k,v in _char2bit.items()])
+_charBitAssoc = [
+    ('r', READ),
+    ('w', WRITE),
+    ('i', INSERT),
+    ('l', LOOKUP),
+    ('d', DELETE),
+    ('k', LOCK),
+    ('a', ADMINISTER),
+    ('A', USR0),
+    ('B', USR1),
+    ('C', USR2),
+    ('D', USR3),
+    ('E', USR4),
+    ('F', USR5),
+    ('G', USR6),
+    ('H', USR7),
+]
+
+_char2bit = dict(_charBitAssoc)
+
 
 def crights(s):
     """Canonicalizes string rights to bitmask"""
@@ -50,6 +52,13 @@ class ACL(object):
         """Retrieve the ACL for an AFS directory"""
         pos, neg = _parseAcl(_acl.getAcl(dir))
         return ACL(pos, neg)
+
+def showRights(r):
+    """Takes a bitmask and returns a rwlidka string"""
+    s = ""
+    for char,mask in _charBitAssoc:
+        if r & mask == mask: s += char
+    return s
 
 def _parseRights(s):
     """Parses a rwlid... rights tring to bitmask"""

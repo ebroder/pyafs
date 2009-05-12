@@ -1,6 +1,9 @@
 import nose
 import afs.acl as acl
 
+def test_showRights():
+    assert acl.showRights(acl.READ | acl.WRITE) == "rw"
+
 def test_crights():
     assert acl.crights('read') & acl.READ
     assert acl.crights('read') & acl.LOOKUP
