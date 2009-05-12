@@ -19,6 +19,10 @@ cdef extern int pioctl_read(char *dir, afs_int32 op, void *buffer, unsigned shor
     blob.out_size = size
     blob.out = buffer
     code = pioctl(dir, op, &blob, follow)
+    # This might work with the rest of OpenAFS, but I'm not convinced
+    # the rest of it is consistent
+    if code == -1:
+        raise OSError(errno, strerror(errno))
     pyafs_error(code)
     return code
 
