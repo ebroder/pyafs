@@ -37,8 +37,7 @@ DEF MAXSIZE = 2048
 def getAcl(char* dir, int follow=1):
     cdef char space[MAXSIZE]
     pioctl_read(dir, VIOCGETAL, space, MAXSIZE, follow)
-    ret = space # Python managed string
-    return ret
+    return space
 
 def getCallerAccess(char *dir, int follow=1):
     cdef vcxstat2 stat
