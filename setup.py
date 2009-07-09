@@ -40,6 +40,7 @@ setup(
     ext_modules=[
         PyAFSExtension("afs.afs"),
         PyAFSExtension("afs._pts"),
+        PyAFSExtension("afs._acl"),
         ],
     cmdclass= {"build_ext": build_ext}
 )
