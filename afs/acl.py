@@ -4,11 +4,11 @@ from _acl import READ, WRITE, INSERT, LOOKUP, DELETE, LOCK, ADMINISTER, \
 from _acl import getCallerAccess
 
 _canonical = {
-    "read":     "rl",
-    "write":    "rwlidwk",
-    "all":      "rwlidwka",
-    "mail":     "lik",
-    "none":     "",
+    "read": "rl",
+    "write": "rwlidwk",
+    "all": "rwlidwka",
+    "mail": "lik",
+    "none": "",
 }
 
 _charBitAssoc = [
@@ -32,26 +32,10 @@ _charBitAssoc = [
 _char2bit = dict(_charBitAssoc)
 
 
-def crights(s):
+def readRights(s):
     """Canonicalizes string rights to bitmask"""
     if s in _canonical: s = _canonical[s]
     return _parseRights(s)
-
-class ACL(object):
-    def __init__(self, pos, neg):
-        """
-        ``pos``
-            Dictionary of usernames to positive ACL bitmasks
-        ``neg``
-            Dictionary of usernames to negative ACL bitmasks
-        """
-        self.pos = pos
-        self.neg = neg
-    @staticmethod
-    def retrieve(dir,follow=1):
-        """Retrieve the ACL for an AFS directory"""
-        pos, neg = _parseAcl(_acl.getAcl(dir, follow))
-        return ACL(pos, neg)
 
 def showRights(r):
     """Takes a bitmask and returns a rwlidka string"""
@@ -85,4 +69,20 @@ def _parseAcl(inp):
             # negative acl
             neg[name] = int(acl)
     return (pos, neg)
+
+class ACL(object):
+    def __init__(self, pos, neg):
+        """
+        ``pos``
+            Dictionary of usernames to positive ACL bitmasks
+        ``neg``
+            Dictionary of usernames to negative ACL bitmasks
+        """
+        self.pos = pos
+        self.neg = neg
+    @staticmethod
+    def retrieve(dir, follow=1):
+        """Retrieve the ACL for an AFS directory"""
+        pos, neg = _parseAcl(_acl.getAcl(dir, follow))
+        return ACL(pos, neg)
 
