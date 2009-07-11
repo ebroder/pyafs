@@ -4,10 +4,10 @@ import afs.acl as acl
 def test_showRights():
     assert acl.showRights(acl.READ | acl.WRITE) == "rw"
 
-def test_crights():
-    assert acl.crights('read') & acl.READ
-    assert acl.crights('read') & acl.LOOKUP
-    assert not acl.crights('read') & acl.WRITE
+def test_readRights():
+    assert acl.readRights('read') & acl.READ
+    assert acl.readRights('read') & acl.LOOKUP
+    assert not acl.readRights('read') & acl.WRITE
 
 def test_retrieve():
     assert acl.ACL.retrieve('/afs/athena.mit.edu/contrib/bitbucket2').pos['system:anyuser'] & acl.WRITE
