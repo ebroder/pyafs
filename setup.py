@@ -17,7 +17,7 @@ include_dirs = [os.path.join(os.path.dirname(__file__), 'afs'),
                 '%s/include' % root]
 library_dirs = ['%s/lib' % root,
                 '%s/lib/afs' % root]
-libraries = ['afsauthent', 'afsrpc', 'afsutil', 'resolv']
+libraries = ['afsauthent', 'afsrpc', 'resolv']
 define_macros = [('AFS_PTHREAD_ENV', None)]
 
 def PyAFSExtension(module):
