@@ -17,7 +17,11 @@ include_dirs = [os.path.join(os.path.dirname(__file__), 'afs'),
                 '%s/include' % root]
 library_dirs = ['%s/lib' % root,
                 '%s/lib/afs' % root]
-libraries = ['afsauthent', 'afsrpc', 'resolv']
+if os.path.exists('%s/lib/libafsauthent_pic.a' % root):
+    suffix = '_pic'
+else:
+    suffix = ''
+libraries = ['afsauthent%s' % suffix, 'afsrpc%s' % suffix, 'resolv']
 define_macros = [('AFS_PTHREAD_ENV', None)]
 
 def PyAFSExtension(module):
