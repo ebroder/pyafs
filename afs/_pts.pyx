@@ -70,7 +70,6 @@ cdef import from "afs/ptuser.h":
 cdef import from "afs/pterror.h":
     enum:
         PRNOENT
-        PRTOOMANY
 
 cdef class PTEntry:
     cdef public afs_int32 flags
@@ -370,8 +369,6 @@ cdef class PTS:
                 members.append(alist.prlist_val[i])
             free(alist.prlist_val)
 
-        if over:
-            code = PRTOOMANY
         pyafs_error(code)
 
         return members
@@ -397,8 +394,6 @@ cdef class PTS:
                 owned.append(alist.prlist_val[i])
             free(alist.prlist_val)
 
-        if over:
-            code = PRTOOMANY
         pyafs_error(code)
 
         return owned
