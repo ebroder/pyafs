@@ -81,7 +81,7 @@ class ACL(object):
         self.pos = pos
         self.neg = neg
     @staticmethod
-    def retrieve(dir, follow=1):
+    def retrieve(dir, follow=True):
         """Retrieve the ACL for an AFS directory"""
         pos, neg = _parseAcl(_acl.getAcl(dir, follow))
         return ACL(pos, neg)
