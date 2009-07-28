@@ -217,7 +217,7 @@ cdef class PTS:
         name if it's a string, or otherwise just converting it to an
         integer.
         """
-        if isinstance(ident, (str, unicode)):
+        if isinstance(ident, basestring):
             return self._NameToId(ident)
         else:
             return int(ident)
