@@ -654,3 +654,43 @@ cdef class PTS:
         finally:
             if ctx is not NULL:
                 krb5_free_context(ctx)
+
+    def _Krb5ToAfs(self, krb5_name):
+        """Convert a Kerberos v5 principal to an AFS one."""
+        cdef krb5_context ctx = NULL
+        cdef krb5_principal k5_princ = NULL
+        cdef char *k4_name, *k4_inst, *k4_realm
+        cdef object afs_princ
+        cdef object afs_name, afs_realm
+
+        k4_name = <char *>malloc(40)
+        k4_name[0] = '\0'
+        k4_inst = <char *>malloc(40)
+        k4_inst[0] = '\0'
+        k4_realm = <char *>malloc(40)
+        k4_realm[0] = '\0'
+
+        code = krb5_init_context(&ctx)
+        try:
+            pyafs_error(code)
+
+            code = krb5_parse_name(ctx, krb5_name, &k5_princ)
+            try:
+                pyafs_error(code)
+
+                code = krb5_524_conv_principal(ctx, k5_princ, k4_name, k4_inst, k4_realm)
+                pyafs_error(code)
+
+                afs_princ = kname_unparse(k4_name, k4_inst, k4_realm)
+                afs_name, afs_realm = afs_princ.rsplit('@', 1)
+
+                if k4_realm == self.realm:
+                    return afs_name
+                else:
+                    return '%s@%s' % (afs_name, afs_realm.lower())
+            finally:
+                if k5_princ is not NULL:
+                    krb5_free_principal(ctx, k5_princ)
+        finally:
+            if ctx is not NULL:
+                krb5_free_context(ctx)
