@@ -71,6 +71,27 @@ cdef import from "afs/pterror.h":
     enum:
         PRNOENT
 
+cdef import from "krb5/krb5.h":
+    struct _krb5_context:
+        pass
+    struct krb5_principal_data:
+        pass
+
+    ctypedef _krb5_context krb5_context
+    ctypedef krb5_principal_data * krb5_principal
+
+    ctypedef long krb5_int32
+    ctypedef krb5_int32 krb5_error_code
+    krb5_error_code krb5_init_context(krb5_context *)
+    krb5_error_code krb5_parse_name(krb5_context, char *, krb5_principal *)
+    krb5_error_code krb5_unparse_name(krb5_context, krb5_principal, char **)
+    krb5_error_code krb5_524_conv_principal(krb5_context, krb5_principal, char *, char *, char *)
+    krb5_error_code krb5_425_conv_principal(krb5_context, char *, char *, char *, krb5_principal *)
+    krb5_error_code krb5_get_host_realm(krb5_context, char *, char ***)
+    void krb5_free_host_realm(krb5_context, char **)
+    void krb5_free_principal(krb5_context, krb5_principal)
+    void krb5_free_context(krb5_context)
+
 cdef class PTEntry:
     cdef public afs_int32 flags
     cdef public afs_int32 id
@@ -131,14 +152,20 @@ cdef class PTS:
       - 2: fail if an authenticated connection can't be established
       - 3: same as 2, plus encrypt all traffic to the protection
         server
+
+    The realm attribute is the Kerberos realm against which this cell
+    authenticates.
     """
     cdef ubik_client * client
     cdef readonly object cell
+    cdef readonly object realm
 
     def __cinit__(self, cell=None, sec=1):
         cdef afs_int32 code
         cdef afsconf_dir *cdir
         cdef afsconf_cell info
+        cdef krb5_context context
+        cdef char ** hrealms = NULL
         cdef char * c_cell
         cdef ktc_principal prin
         cdef ktc_token token
@@ -166,6 +193,14 @@ cdef class PTS:
                               (AFSDIR_CLIENT_ETC_DIRPATH, strerror(errno)))
         code = afsconf_GetCellInfo(cdir, c_cell, "afsprot", &info)
         pyafs_error(code)
+
+        code = krb5_init_context(&context)
+        pyafs_error(code)
+        code = krb5_get_host_realm(context, info.hostName[0], &hrealms)
+        pyafs_error(code)
+        self.realm = hrealms[0]
+        krb5_free_host_realm(context, hrealms)
+        krb5_free_context(context)
 
         self.cell = info.name
 
