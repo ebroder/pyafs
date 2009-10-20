@@ -1,5 +1,6 @@
 from afs cimport *
 from afs import pyafs_error
+import re
 
 cdef import from "afs/ptuser.h":
     enum:
@@ -77,7 +78,7 @@ cdef import from "krb5/krb5.h":
     struct krb5_principal_data:
         pass
 
-    ctypedef _krb5_context krb5_context
+    ctypedef _krb5_context * krb5_context
     ctypedef krb5_principal_data * krb5_principal
 
     ctypedef long krb5_int32
@@ -137,6 +138,28 @@ cdef int _ptentry_to_c(prcheckentry * c_entry, PTEntry p_entry) except -1:
     c_entry.count = p_entry.count
     strncpy(c_entry.name, p_entry.name, sizeof(c_entry.name))
     return 0
+
+cdef object kname_re = re.compile(r'^([^.].*?)(?<!\\)(?:\.(.*?))?(?<!\\)@([^@]*)$')
+
+cdef object kname_parse(fullname):
+    """Parse a krb4-style principal into a name, instance, and realm."""
+    cdef object re_match = kname_re.match(fullname)
+    if not re_match:
+        return None
+    else:
+        princ = re_match.groups()
+        return tuple([re.sub(r'\\(.)', r'\1', x) if x else x for x in princ])
+
+cdef object kname_unparse(name, inst, realm):
+    """Unparse a name, instance, and realm into a single krb4
+    principal string."""
+    name = re.sub('r([.\\@])', r'\\\1', name)
+    inst = re.sub('r([.\\@])', r'\\\1', inst)
+    realm = re.sub(r'([\\@])', r'\\\1', realm)
+    if inst:
+        return '%s.%s@%s' % (name, inst, realm)
+    else:
+        return '%s@%s' % (name, realm)
 
 cdef class PTS:
     """
