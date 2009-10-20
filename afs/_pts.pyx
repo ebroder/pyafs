@@ -607,3 +607,50 @@ cdef class PTS:
 
         code = ubik_PR_SetFieldsEntry(self.client, 0, id, mask, flags, ngroups, nusers, 0, 0)
         pyafs_error(code)
+
+    def _AfsToKrb5(self, afs_name):
+        """Convert an AFS principal to a Kerberos v5 one."""
+        cdef krb5_context ctx = NULL
+        cdef krb5_principal princ = NULL
+        cdef krb5_error_code code = 0
+        cdef char * krb5_princ = NULL
+        cdef char *name = NULL, *inst = NULL, *realm = NULL
+        cdef object pname, pinst, prealm
+
+        if '@' in afs_name:
+            pname, prealm = afs_name.rsplit('@', 1)
+            prealm = prealm.upper()
+            krb4_name = '%s@%s' % (pname, prealm)
+        else:
+            krb4_name = '%s@%s' % (afs_name, self.realm)
+
+        pname, pinst, prealm = kname_parse(krb4_name)
+        if pname:
+            name = pname
+        if pinst:
+            inst = pinst
+        if prealm:
+            realm = prealm
+
+        code = krb5_init_context(&ctx)
+        try:
+            pyafs_error(code)
+
+            code = krb5_425_conv_principal(ctx, name, inst, realm, &princ)
+            try:
+                pyafs_error(code)
+
+                code = krb5_unparse_name(ctx, princ, &krb5_princ)
+                try:
+                    pyafs_error(code)
+
+                    return krb5_princ
+                finally:
+                    if krb5_princ is not NULL:
+                        free(krb5_princ)
+            finally:
+                if princ is not NULL:
+                    krb5_free_principal(ctx, princ)
+        finally:
+            if ctx is not NULL:
+                krb5_free_context(ctx)
