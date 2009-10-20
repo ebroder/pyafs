@@ -24,13 +24,15 @@ else:
 libraries = ['afsauthent%s' % suffix, 'afsrpc%s' % suffix, 'resolv']
 define_macros = [('AFS_PTHREAD_ENV', None)]
 
-def PyAFSExtension(module):
+def PyAFSExtension(module, *args, **kwargs):
+    kwargs.setdefault('libraries', []).extend(libraries)
+    kwargs.setdefault('include_dirs', []).extend(include_dirs)
+    kwargs.setdefault('library_dirs', []).extend(library_dirs)
+    kwargs.setdefault('define_macros', []).extend(define_macros)
     return Extension(module,
                      ["%s.pyx" % module.replace('.', '/')],
-                     libraries=libraries,
-                     include_dirs=include_dirs,
-                     library_dirs=library_dirs,
-                     define_macros=define_macros)
+                     *args,
+                     **kwargs)
 
 setup(
     name="PyAFS",
