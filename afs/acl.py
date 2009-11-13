@@ -5,8 +5,8 @@ from _acl import getCallerAccess
 
 _canonical = {
     "read": "rl",
-    "write": "rwlidwk",
-    "all": "rwlidwka",
+    "write": "rlidwk",
+    "all": "rlidwka",
     "mail": "lik",
     "none": "",
 }
