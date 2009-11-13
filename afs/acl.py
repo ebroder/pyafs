@@ -11,12 +11,14 @@ _canonical = {
     "none": "",
 }
 
+_reverseCanonical = dict((y, x) for (x, y) in _canonical.iteritems())
+
 _charBitAssoc = [
     ('r', READ),
-    ('w', WRITE),
-    ('i', INSERT),
     ('l', LOOKUP),
+    ('i', INSERT),
     ('d', DELETE),
+    ('w', WRITE),
     ('k', LOCK),
     ('a', ADMINISTER),
     ('A', USR0),
@@ -31,6 +33,13 @@ _charBitAssoc = [
 
 _char2bit = dict(_charBitAssoc)
 
+
+def rightsToEnglish(s):
+    """Turns a rlwidwka string into a canonical name if possible"""
+    if s in _reverseCanonical:
+        return _reverseCanonical[s]
+    else:
+        return ''
 
 def readRights(s):
     """Canonicalizes string rights to bitmask"""
