@@ -43,3 +43,6 @@ def getCallerAccess(char *dir, int follow=1):
     cdef vcxstat2 stat
     pioctl_read(dir, VIOC_GETVCXSTATUS2, <void*>&stat, sizeof(vcxstat2), follow)
     return stat.callerAccess
+
+def setAcl(char* dir, char* acl, int follow=1):
+    pioctl_write(dir, VIOCSETAL, acl, follow)

@@ -9,6 +9,7 @@ cdef extern from "string.h":
     char * strncpy(char *s1, char *s2, size_t n)
     void * memset(void *b, int c, size_t n)
     void * memcpy(void *s1, void *s2, size_t n)
+    size_t strlen(char *s)
 
 cdef extern from "stdlib.h":
      void * malloc(size_t size)
@@ -157,9 +158,10 @@ cdef extern from "afs/vice.h":
 cdef import from "afs/venus.h":
     enum:
         # PIOCTLS to Venus that we use
-        VIOCGETAL, VIOC_GETVCXSTATUS2
+        VIOCGETAL, VIOC_GETVCXSTATUS2, VIOCSETAL
 
 # pioctl doesn't actually have a header, so we have to define it here
 cdef extern int pioctl(char *, afs_int32, ViceIoctl *, afs_int32)
 cdef int pioctl_read(char *, afs_int32, void *, unsigned short, afs_int32) except -1
+cdef int pioctl_write(char *, afs_int32, char *, afs_int32) except -1
 

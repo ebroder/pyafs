@@ -70,6 +70,16 @@ def _parseAcl(inp):
             neg[name] = int(acl)
     return (pos, neg)
 
+def _unparseAcl(pos, neg):
+    npos = len(pos)
+    nneg = len(neg)
+    acl = "%d\n%d\n" % (npos, nneg)
+    for p in pos.items():
+        acl += "%s\t%d\n" % p
+    for n in neg.items():
+        acl += "%s\t%d\n" % n
+    return acl
+
 class ACL(object):
     def __init__(self, pos, neg):
         """
@@ -85,4 +95,27 @@ class ACL(object):
         """Retrieve the ACL for an AFS directory"""
         pos, neg = _parseAcl(_acl.getAcl(dir, follow))
         return ACL(pos, neg)
-
+    def apply(self, dir, follow=True):
+        """Apply the ACL to a directory"""
+        self._clean()
+        _acl.setAcl(dir, _unparseAcl(self.pos, self.neg), follow)
+    def _clean(self):
+        """Clean an ACL by removing any entries whose bitmask is 0"""
+        for n,a in self.pos.items():
+            if a == 0:
+                del self.pos[n]
+        for n,a in self.neg.items():
+            if a == 0:
+                del self.neg[n]
+    def set(self, user, bitmask, negative=False):
+        """Set the bitmask for a given user"""
+        if bitmask < 0 or bitmask > max(_char2bit.values()):
+            raise ValueError, "Invalid bitmask"
+        if negative:
+            self.neg[user] = bitmask
+        else:
+            self.pos[user] = bitmask
+    def remove(self, user, negative=False):
+        """Convenience function to removeSet the bitmask for a given user"""
+        self.set(user, 0, negative)
+        

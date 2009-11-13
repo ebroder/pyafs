@@ -26,6 +26,20 @@ cdef extern int pioctl_read(char *dir, afs_int32 op, void *buffer, unsigned shor
     pyafs_error(code)
     return code
 
+cdef extern int pioctl_write(char *dir, afs_int32 op, char *buffer, afs_int32 follow) except -1:
+    cdef ViceIoctl blob
+    cdef afs_int32 code
+    blob.cin = buffer
+    blob.in_size = 1 + strlen(buffer)
+    blob.out_size = 0
+    code = pioctl(dir, op, &blob, follow)
+    # This might work with the rest of OpenAFS, but I'm not convinced
+    # the rest of it is consistent
+    if code == -1:
+        raise OSError(errno, strerror(errno))
+    pyafs_error(code)
+    return code
+
 # Error handling
 
 class AFSException(Exception):
