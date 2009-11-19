@@ -1,5 +1,6 @@
 from afs cimport *
 from afs import pyafs_error
+import re
 
 cdef import from "afs/ptuser.h":
     enum:
@@ -71,6 +72,27 @@ cdef import from "afs/pterror.h":
     enum:
         PRNOENT
 
+cdef import from "krb5/krb5.h":
+    struct _krb5_context:
+        pass
+    struct krb5_principal_data:
+        pass
+
+    ctypedef _krb5_context * krb5_context
+    ctypedef krb5_principal_data * krb5_principal
+
+    ctypedef long krb5_int32
+    ctypedef krb5_int32 krb5_error_code
+    krb5_error_code krb5_init_context(krb5_context *)
+    krb5_error_code krb5_parse_name(krb5_context, char *, krb5_principal *)
+    krb5_error_code krb5_unparse_name(krb5_context, krb5_principal, char **)
+    krb5_error_code krb5_524_conv_principal(krb5_context, krb5_principal, char *, char *, char *)
+    krb5_error_code krb5_425_conv_principal(krb5_context, char *, char *, char *, krb5_principal *)
+    krb5_error_code krb5_get_host_realm(krb5_context, char *, char ***)
+    void krb5_free_host_realm(krb5_context, char **)
+    void krb5_free_principal(krb5_context, krb5_principal)
+    void krb5_free_context(krb5_context)
+
 cdef class PTEntry:
     cdef public afs_int32 flags
     cdef public afs_int32 id
@@ -117,6 +139,28 @@ cdef int _ptentry_to_c(prcheckentry * c_entry, PTEntry p_entry) except -1:
     strncpy(c_entry.name, p_entry.name, sizeof(c_entry.name))
     return 0
 
+cdef object kname_re = re.compile(r'^([^.].*?)(?<!\\)(?:\.(.*?))?(?<!\\)@([^@]*)$')
+
+cdef object kname_parse(fullname):
+    """Parse a krb4-style principal into a name, instance, and realm."""
+    cdef object re_match = kname_re.match(fullname)
+    if not re_match:
+        return None
+    else:
+        princ = re_match.groups()
+        return tuple([re.sub(r'\\(.)', r'\1', x) if x else x for x in princ])
+
+cdef object kname_unparse(name, inst, realm):
+    """Unparse a name, instance, and realm into a single krb4
+    principal string."""
+    name = re.sub('r([.\\@])', r'\\\1', name)
+    inst = re.sub('r([.\\@])', r'\\\1', inst)
+    realm = re.sub(r'([\\@])', r'\\\1', realm)
+    if inst:
+        return '%s.%s@%s' % (name, inst, realm)
+    else:
+        return '%s@%s' % (name, realm)
+
 cdef class PTS:
     """
     A PTS object is essentially a handle to talk to the server in a
@@ -131,14 +175,20 @@ cdef class PTS:
       - 2: fail if an authenticated connection can't be established
       - 3: same as 2, plus encrypt all traffic to the protection
         server
+
+    The realm attribute is the Kerberos realm against which this cell
+    authenticates.
     """
     cdef ubik_client * client
     cdef readonly object cell
+    cdef readonly object realm
 
     def __cinit__(self, cell=None, sec=1):
         cdef afs_int32 code
         cdef afsconf_dir *cdir
         cdef afsconf_cell info
+        cdef krb5_context context
+        cdef char ** hrealms = NULL
         cdef char * c_cell
         cdef ktc_principal prin
         cdef ktc_token token
@@ -166,6 +216,14 @@ cdef class PTS:
                               (AFSDIR_CLIENT_ETC_DIRPATH, strerror(errno)))
         code = afsconf_GetCellInfo(cdir, c_cell, "afsprot", &info)
         pyafs_error(code)
+
+        code = krb5_init_context(&context)
+        pyafs_error(code)
+        code = krb5_get_host_realm(context, info.hostName[0], &hrealms)
+        pyafs_error(code)
+        self.realm = hrealms[0]
+        krb5_free_host_realm(context, hrealms)
+        krb5_free_context(context)
 
         self.cell = info.name
 
@@ -549,3 +607,90 @@ cdef class PTS:
 
         code = ubik_PR_SetFieldsEntry(self.client, 0, id, mask, flags, ngroups, nusers, 0, 0)
         pyafs_error(code)
+
+    def _AfsToKrb5(self, afs_name):
+        """Convert an AFS principal to a Kerberos v5 one."""
+        cdef krb5_context ctx = NULL
+        cdef krb5_principal princ = NULL
+        cdef krb5_error_code code = 0
+        cdef char * krb5_princ = NULL
+        cdef char *name = NULL, *inst = NULL, *realm = NULL
+        cdef object pname, pinst, prealm
+
+        if '@' in afs_name:
+            pname, prealm = afs_name.rsplit('@', 1)
+            prealm = prealm.upper()
+            krb4_name = '%s@%s' % (pname, prealm)
+        else:
+            krb4_name = '%s@%s' % (afs_name, self.realm)
+
+        pname, pinst, prealm = kname_parse(krb4_name)
+        if pname:
+            name = pname
+        if pinst:
+            inst = pinst
+        if prealm:
+            realm = prealm
+
+        code = krb5_init_context(&ctx)
+        try:
+            pyafs_error(code)
+
+            code = krb5_425_conv_principal(ctx, name, inst, realm, &princ)
+            try:
+                pyafs_error(code)
+
+                code = krb5_unparse_name(ctx, princ, &krb5_princ)
+                try:
+                    pyafs_error(code)
+
+                    return krb5_princ
+                finally:
+                    if krb5_princ is not NULL:
+                        free(krb5_princ)
+            finally:
+                if princ is not NULL:
+                    krb5_free_principal(ctx, princ)
+        finally:
+            if ctx is not NULL:
+                krb5_free_context(ctx)
+
+    def _Krb5ToAfs(self, krb5_name):
+        """Convert a Kerberos v5 principal to an AFS one."""
+        cdef krb5_context ctx = NULL
+        cdef krb5_principal k5_princ = NULL
+        cdef char *k4_name, *k4_inst, *k4_realm
+        cdef object afs_princ
+        cdef object afs_name, afs_realm
+
+        k4_name = <char *>malloc(40)
+        k4_name[0] = '\0'
+        k4_inst = <char *>malloc(40)
+        k4_inst[0] = '\0'
+        k4_realm = <char *>malloc(40)
+        k4_realm[0] = '\0'
+
+        code = krb5_init_context(&ctx)
+        try:
+            pyafs_error(code)
+
+            code = krb5_parse_name(ctx, krb5_name, &k5_princ)
+            try:
+                pyafs_error(code)
+
+                code = krb5_524_conv_principal(ctx, k5_princ, k4_name, k4_inst, k4_realm)
+                pyafs_error(code)
+
+                afs_princ = kname_unparse(k4_name, k4_inst, k4_realm)
+                afs_name, afs_realm = afs_princ.rsplit('@', 1)
+
+                if k4_realm == self.realm:
+                    return afs_name
+                else:
+                    return '%s@%s' % (afs_name, afs_realm.lower())
+            finally:
+                if k5_princ is not NULL:
+                    krb5_free_principal(ctx, k5_princ)
+        finally:
+            if ctx is not NULL:
+                krb5_free_context(ctx)
