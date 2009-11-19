@@ -45,8 +45,9 @@ setup(
     packages=['afs', 'afs.tests'],
     ext_modules=[
         PyAFSExtension("afs.afs"),
-        PyAFSExtension("afs._pts", libraries=['krb5']),
         PyAFSExtension("afs._acl"),
+        PyAFSExtension("afs._fs"),
+        PyAFSExtension("afs._pts", libraries=['krb5']),
         ],
     cmdclass= {"build_ext": build_ext}
 )

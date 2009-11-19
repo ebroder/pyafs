@@ -4,6 +4,8 @@ afs/_pts.c
 afs/_pts.dep
 afs/_acl.c
 afs/_acl.dep
+afs/_fs.c
+afs/_fs.dep
 
 *.so
 build
