@@ -2,7 +2,7 @@ from afs cimport *
 from afs import pyafs_error
 import re
 
-cdef import from "afs/ptuser.h":
+cdef extern from "afs/ptuser.h":
     enum:
         PR_MAXNAMELEN
         PRGRP
@@ -68,11 +68,11 @@ cdef import from "afs/ptuser.h":
     int ubik_PR_ListEntries(ubik_client *, afs_int32, afs_int32, afs_int32, prentries *, afs_int32 *)
     int ubik_PR_SetFieldsEntry(ubik_client *, afs_int32, afs_int32, afs_int32, afs_int32, afs_int32, afs_int32, afs_int32, afs_int32)
 
-cdef import from "afs/pterror.h":
+cdef extern from "afs/pterror.h":
     enum:
         PRNOENT
 
-cdef import from "krb5/krb5.h":
+cdef extern from "krb5/krb5.h":
     struct _krb5_context:
         pass
     struct krb5_principal_data:

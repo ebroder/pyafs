@@ -155,7 +155,7 @@ cdef extern from "afs/vice.h":
         unsigned short out_size
         unsigned short in_size
 
-cdef import from "afs/venus.h":
+cdef extern from "afs/venus.h":
     enum:
         # PIOCTLS to Venus that we use
         VIOCGETAL, VIOC_GETVCXSTATUS2, VIOCSETAL, VIOC_FILE_CELL_NAME

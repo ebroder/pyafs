@@ -5,8 +5,8 @@ General PyAFS utilities, such as error handling
 import sys
 
 # otherwise certain headers are unhappy
-cdef import from "netinet/in.h": pass
-cdef import from "afs/vice.h": pass
+cdef extern from "netinet/in.h": pass
+cdef extern from "afs/vice.h": pass
 
 cdef int _init = 0
 

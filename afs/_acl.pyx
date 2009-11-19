@@ -1,7 +1,7 @@
 from afs cimport *
 from afs import pyafs_error
 
-cdef import from "afs/prs_fs.h":
+cdef extern from "afs/prs_fs.h":
     enum:
         PRSFS_READ, PRSFS_WRITE, PRSFS_INSERT, PRSFS_LOOKUP,
         PRSFS_DELETE, PRSFS_LOCK, PRSFS_ADMINISTER,
