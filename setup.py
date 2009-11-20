@@ -44,7 +44,7 @@ setup(
     requires=['Cython'],
     packages=['afs', 'afs.tests'],
     ext_modules=[
-        PyAFSExtension("afs.afs"),
+        PyAFSExtension("afs._util"),
         PyAFSExtension("afs._acl"),
         PyAFSExtension("afs._fs"),
         PyAFSExtension("afs._pts", libraries=['krb5']),

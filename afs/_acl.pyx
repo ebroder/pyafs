@@ -1,5 +1,5 @@
-from afs cimport *
-from afs import pyafs_error
+from afs._util cimport *
+from afs._util import pyafs_error
 
 cdef extern from "afs/prs_fs.h":
     enum:
