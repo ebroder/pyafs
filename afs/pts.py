@@ -1,5 +1,5 @@
 import collections
-import _pts
+from afs import _pts
 
 class PTRelationSet(collections.MutableSet):
     """Collection class for the groups/members of a PTEntry.

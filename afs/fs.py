@@ -1,6 +1,6 @@
 import errno
-import _fs
-from _fs import whichcell
+import afs._fs
+from afs._fs import whichcell
 
 def inafs(path):
     """Return True if a path is in AFS."""
