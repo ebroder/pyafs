@@ -354,6 +354,14 @@ class PTS(_pts.PTS):
         else:
             return PTEntry(self, id=ident)
 
+    def getEntryFromKrbname(self, ident):
+        """Retrieve a PTEntry matching a given Kerberos v5 principal.
+
+        getEntryFromKrb accepts a krb5 principal, converts it to the
+        equivalent AFS principal, and returns a PTEntry for that
+        principal."""
+        return self.getEntry(self._Krb5ToAfs(ident))
+
     def expire(self):
         """Flush the cache of PTEntry objects.
 
