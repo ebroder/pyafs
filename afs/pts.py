@@ -248,6 +248,12 @@ class PTEntry(object):
         self._name = val
     name = property(_get_name, _set_name)
 
+    def _get_krbname(self):
+        return self._pts._AfsToKrb5(self.name)
+    def _set_krbname(self, val):
+        self.name = self._pts._Krb5ToAfs(val)
+    krbname = property(_get_krbname, _set_krbname)
+
     def _get_count(self):
         self._loadEntry()
         return self._count
