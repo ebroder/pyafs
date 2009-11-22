@@ -1,5 +1,5 @@
 import errno
-import afs._fs
+from afs import _fs
 from afs._fs import whichcell
 
 def inafs(path):

@@ -1,4 +1,4 @@
-import afs._acl
+from afs import _acl
 from afs._acl import READ, WRITE, INSERT, LOOKUP, DELETE, LOCK, ADMINISTER, \
     USR0, USR1, USR2, USR3, USR4, USR5, USR6, USR7
 from afs._acl import getCallerAccess
