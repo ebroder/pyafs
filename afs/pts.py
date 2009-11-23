@@ -1,7 +1,12 @@
 import collections
 from afs import _pts
 
-class PTRelationSet(collections.MutableSet):
+try:
+    SetMixin = collections.MutableSet
+except AttributeError:
+    SetMixin = object
+
+class PTRelationSet(SetMixin):
     """Collection class for the groups/members of a PTEntry.
 
     This class, which acts like a set, is actually a view of the
@@ -166,6 +171,16 @@ class PTRelationSet(collections.MutableSet):
             elt.members._discard(self._ent)
 
         self._discard(elt)
+
+    def remove(self, elt):
+        """Remove an entity from a group; it must already be a member.
+
+        If the entity is not a member, raise a KeyError.
+        """
+        if elt not in self:
+            raise KeyError(elt)
+
+        self.discard(elt)
 
 
 class PTEntry(object):
