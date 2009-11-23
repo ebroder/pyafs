@@ -45,7 +45,8 @@ class PTRelationSet(collections.MutableSet):
         Args:
             elt: The element to add.
         """
-        self._set.add(self._ent._pts.getEntry(elt))
+        if hasattr(self, '_set'):
+            self._set.add(self._ent._pts.getEntry(elt))
 
     def _discard(self, elt):
         """Remove a PTEntry to this instance's internal representation.
@@ -57,7 +58,8 @@ class PTRelationSet(collections.MutableSet):
         Args:
             elt: The element to discard.
         """
-        self._set.discard(self._ent._pts.getEntry(elt))
+        if hasattr(self, '_set'):
+            self._set.discard(self._ent._pts.getEntry(elt))
 
     def __len__(self):
         """Count the members/groups in this set.
