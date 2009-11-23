@@ -24,8 +24,8 @@ which will build the C extensions in place next to their source,
 allowing you to import the various modules, so long as your current
 working directory is the root of the PyAFS source tree.
 
-Alternatively, PyHesiod has been packaged for Debian and Ubuntu. To
-build the Debian package of the latest release, run::
+Alternatively, PyAFS has been packaged for Debian and Ubuntu. To build
+the Debian package of the latest release, run::
 
   $ git checkout debian
   $ git buildpackage
