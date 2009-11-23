@@ -1,0 +1,18 @@
+This package was written and debianized by Evan Broder
+<broder@mit.edu> on Sun, Nov. 22, 2009.
+
+Upstream Author: 
+
+    Evan Broder <broder@mit.edu>
+
+Copyright: 
+
+    Copyright (C) 2009 Evan Broder
+
+License:
+
+    This software is licensed under version 2 or later of the GPL. The
+    GPL can be found in the file `/usr/share/common-licenses/GPL-2'.
+    
+The Debian packaging is (C) 2009, Evan Broder <broder@mit.edu> and is
+licensed under the GPL License, see above.

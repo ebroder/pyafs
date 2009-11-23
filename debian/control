@@ -1,0 +1,14 @@
+Source: python-afs
+Section: python
+Priority: extra
+Maintainer: Evan Broder <broder@mit.edu>
+Build-Depends: cdbs, debhelper, python-all-dev, python-support, python-pyrex, python-setuptools, libopenafs-dev
+Standards-Version: 3.8.3
+
+Package: python-afs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}
+Provides: ${python:Provides}
+Description: AFS bindings for Python
+ PyAFS provides a set of Python bindings for the AFS distributed
+ filesystem.
