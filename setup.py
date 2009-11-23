@@ -40,6 +40,7 @@ setup(
     description="PyAFS - Python bindings for AFS",
     author="Evan Broder",
     author_email="broder@mit.edu",
+    url="http://github.com/ebroder/pyafs/",
     license="GPL",
     requires=['Cython'],
     packages=['afs', 'afs.tests'],
