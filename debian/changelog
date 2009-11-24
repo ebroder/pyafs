@@ -1,3 +1,9 @@
+python-afs (0.1.0-2) unstable; urgency=low
+
+  * Correct build-deps.
+
+ -- Evan Broder <broder@mit.edu>  Tue, 24 Nov 2009 18:53:35 -0500
+
 python-afs (0.1.0-1) unstable; urgency=low
 
   * Initial Release.
