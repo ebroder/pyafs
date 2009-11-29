@@ -321,6 +321,13 @@ class PTEntry(object):
             for field in self._entry_attrs:
                 setattr(self, '_%s' % field, self._pts.getEntry(getattr(info, field)))
 
+
+PTS_UNAUTH = 0
+PTS_AUTH = 1
+PTS_FORCEAUTH = 2
+PTS_ENCRYPT = 3
+
+
 class PTS(_pts.PTS):
     """A connection to an AFS protection database.
 
@@ -338,12 +345,14 @@ class PTS(_pts.PTS):
     Args:
       cell: The cell to connect to. If None (the default), PTS
         connects to the workstations home cell.
-      sec: The security level to connect with, an integer from 0 to 3:
-        - 0: unauthenticated connection
-        - 1: try authenticated, then fall back to unauthenticated
-        - 2: fail if an authenticated connection can't be established
-        - 3: same as 2, plus encrypt all traffic to the protection
-          server
+      sec: The security level to connect with:
+        - PTS_UNAUTH: unauthenticated connection
+        - PTS_AUTH: try authenticated, then fall back to
+          unauthenticated
+        - PTS_FORCEAUTH: fail if an authenticated connection can't be
+          established
+        - PTS_ENCRYPT: same as PTS_FORCEAUTH, plus encrypt all traffic
+          to the protection server
 
     Attributes:
       realm: The Kerberos realm against which this cell authenticates
