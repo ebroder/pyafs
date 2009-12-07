@@ -36,7 +36,7 @@ def PyAFSExtension(module, *args, **kwargs):
 
 setup(
     name="PyAFS",
-    version="0.1.0",
+    version="0.1.1",
     description="PyAFS - Python bindings for AFS",
     author="Evan Broder",
     author_email="broder@mit.edu",

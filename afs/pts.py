@@ -1,7 +1,12 @@
 import collections
 from afs import _pts
 
-class PTRelationSet(collections.MutableSet):
+try:
+    SetMixin = collections.MutableSet
+except AttributeError:
+    SetMixin = object
+
+class PTRelationSet(SetMixin):
     """Collection class for the groups/members of a PTEntry.
 
     This class, which acts like a set, is actually a view of the
@@ -45,7 +50,8 @@ class PTRelationSet(collections.MutableSet):
         Args:
             elt: The element to add.
         """
-        self._set.add(self._ent._pts.getEntry(elt))
+        if hasattr(self, '_set'):
+            self._set.add(self._ent._pts.getEntry(elt))
 
     def _discard(self, elt):
         """Remove a PTEntry to this instance's internal representation.
@@ -57,7 +63,8 @@ class PTRelationSet(collections.MutableSet):
         Args:
             elt: The element to discard.
         """
-        self._set.discard(self._ent._pts.getEntry(elt))
+        if hasattr(self, '_set'):
+            self._set.discard(self._ent._pts.getEntry(elt))
 
     def __len__(self):
         """Count the members/groups in this set.
@@ -164,6 +171,16 @@ class PTRelationSet(collections.MutableSet):
             elt.members._discard(self._ent)
 
         self._discard(elt)
+
+    def remove(self, elt):
+        """Remove an entity from a group; it must already be a member.
+
+        If the entity is not a member, raise a KeyError.
+        """
+        if elt not in self:
+            raise KeyError(elt)
+
+        self.discard(elt)
 
 
 class PTEntry(object):
@@ -304,6 +321,13 @@ class PTEntry(object):
             for field in self._entry_attrs:
                 setattr(self, '_%s' % field, self._pts.getEntry(getattr(info, field)))
 
+
+PTS_UNAUTH = 0
+PTS_AUTH = 1
+PTS_FORCEAUTH = 2
+PTS_ENCRYPT = 3
+
+
 class PTS(_pts.PTS):
     """A connection to an AFS protection database.
 
@@ -321,12 +345,14 @@ class PTS(_pts.PTS):
     Args:
       cell: The cell to connect to. If None (the default), PTS
         connects to the workstations home cell.
-      sec: The security level to connect with, an integer from 0 to 3:
-        - 0: unauthenticated connection
-        - 1: try authenticated, then fall back to unauthenticated
-        - 2: fail if an authenticated connection can't be established
-        - 3: same as 2, plus encrypt all traffic to the protection
-          server
+      sec: The security level to connect with:
+        - PTS_UNAUTH: unauthenticated connection
+        - PTS_AUTH: try authenticated, then fall back to
+          unauthenticated
+        - PTS_FORCEAUTH: fail if an authenticated connection can't be
+          established
+        - PTS_ENCRYPT: same as PTS_FORCEAUTH, plus encrypt all traffic
+          to the protection server
 
     Attributes:
       realm: The Kerberos realm against which this cell authenticates
