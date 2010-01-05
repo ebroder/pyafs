@@ -12,27 +12,26 @@ cdef int _init = 0
 
 # pioctl convenience wrappers
 
-cdef extern int pioctl_read(char *dir, afs_int32 op, void *buffer, unsigned short size, afs_int32 follow) except -1:
+cdef extern int pioctl(char *dir, afs_int32 op,
+                       void *out_buffer, unsigned short out_size,
+                       void *in_buffer, unsigned short in_size,
+                       afs_int32 follow) except -1:
     cdef ViceIoctl blob
     cdef afs_int32 code
-    blob.in_size  = 0
-    blob.out_size = size
-    blob.out = buffer
-    code = pioctl(dir, op, &blob, follow)
-    # This might work with the rest of OpenAFS, but I'm not convinced
-    # the rest of it is consistent
-    if code == -1:
-        raise OSError(errno, strerror(errno))
-    pyafs_error(code)
-    return code
 
-cdef extern int pioctl_write(char *dir, afs_int32 op, char *buffer, afs_int32 follow) except -1:
-    cdef ViceIoctl blob
-    cdef afs_int32 code
-    blob.cin = buffer
-    blob.in_size = 1 + strlen(buffer)
-    blob.out_size = 0
-    code = pioctl(dir, op, &blob, follow)
+    if in_buffer:
+        blob.in_size = in_size
+        blob.cin = in_buffer
+    else:
+        blob.in_size = 0
+
+    if out_buffer:
+        blob.out = out_buffer
+        blob.out_size = out_size
+    else:
+        blob.out_size = 0
+
+    code = cpioctl(dir, op, &blob, follow)
     # This might work with the rest of OpenAFS, but I'm not convinced
     # the rest of it is consistent
     if code == -1:

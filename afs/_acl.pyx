@@ -36,13 +36,13 @@ DEF MAXSIZE = 2048
 
 def getAcl(char* dir, int follow=1):
     cdef char space[MAXSIZE]
-    pioctl_read(dir, VIOCGETAL, space, MAXSIZE, follow)
+    pioctl(dir, VIOCGETAL, space, MAXSIZE, NULL, 0, follow)
     return space
 
 def getCallerAccess(char *dir, int follow=1):
     cdef vcxstat2 stat
-    pioctl_read(dir, VIOC_GETVCXSTATUS2, <void*>&stat, sizeof(vcxstat2), follow)
+    pioctl(dir, VIOC_GETVCXSTATUS2, <void*>&stat, sizeof(vcxstat2), NULL, 0, follow)
     return stat.callerAccess
 
 def setAcl(char* dir, char* acl, int follow=1):
-    pioctl_write(dir, VIOCSETAL, acl, follow)
+    pioctl(dir, VIOCSETAL, NULL, 0, acl, strlen(acl), follow)
