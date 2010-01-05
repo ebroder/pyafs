@@ -1,6 +1,6 @@
 import errno
 from afs import _fs
-from afs._fs import whichcell
+from afs._fs import whichcell, lsmount
 
 def inafs(path):
     """Return True if a path is in AFS."""
