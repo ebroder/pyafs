@@ -215,7 +215,7 @@ class PTEntry(object):
 
       groups: For users, this contains a collection class representing
         the set of groups the user is a member of.
-      users: For groups, this contains a collection class representing
+      members: For groups, this contains a collection class representing
         the members of this group.
     """
     _attrs = ('id', 'name', 'count', 'flags', 'ngroups', 'nusers')
