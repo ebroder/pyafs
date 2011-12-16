@@ -54,6 +54,7 @@ class AFSException(Exception):
         return "[%s] %s" % (self.errno, self.strerror)
 
 def pyafs_error(code):
+    global _init
     if not _init:
         initialize_ACFG_error_table()
         initialize_KTC_error_table()
